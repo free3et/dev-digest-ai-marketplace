@@ -1,0 +1,16 @@
+{
+  "description": "Read-only / write-scope guard for the sdd-engineering spec-creator and plan-verifier agents. Does nothing for the main session or any other agent.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/agent-guard.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

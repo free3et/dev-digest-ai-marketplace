@@ -1,0 +1,9 @@
+{
+  "name": "research-tools",
+  "version": "1.0.0",
+  "description": "Read-only researcher agent that answers concrete questions from a repository and external sources, with evidence.",
+  "author": {
+    "name": "free3et"
+  },
+  "license": "MIT"
+}

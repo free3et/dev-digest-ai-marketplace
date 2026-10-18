@@ -1,0 +1,15 @@
+{
+  "name": "architecture-review",
+  "version": "1.0.0",
+  "description": "Read-only architecture reviewer agent that checks changes against layering and boundary rules.",
+  "author": {
+    "name": "free3et"
+  },
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "engineering-paved-path",
+      "version": "^1.0.0"
+    }
+  ]
+}
