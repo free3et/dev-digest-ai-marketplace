@@ -1,0 +1,18 @@
+{
+  "name": "dev-digest-ai-marketplace",
+  "private": true,
+  "type": "module",
+  "description": "Maintenance scripts for the dev-digest-ai-marketplace Claude Code plugin marketplace.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "git config core.hooksPath .githooks",
+    "validate": "node scripts/validate-marketplace.mjs",
+    "validate:strict": "node scripts/validate-marketplace.mjs --strict",
+    "release": "node scripts/release.mjs",
+    "rollback": "node scripts/rollback.mjs",
+    "build:site": "node scripts/build-site.mjs",
+    "serve:site": "node scripts/build-site.mjs && npx --yes serve site"
+  }
+}

@@ -1,0 +1,30 @@
+#!/bin/sh
+# Pre-push hook: validate the marketplace, then remind about branch protection.
+# Enable once per clone:  npm run setup   (or: git config core.hooksPath .githooks)
+# Silence the reminder after protecting main:  git config marketplace.branchProtection true
+# Skip the hook in an emergency:  git push --no-verify
+
+root="$(git rev-parse --show-toplevel)"
+
+if ! node "$root/scripts/validate-marketplace.mjs" --strict; then
+  echo "pre-push: marketplace validation failed. Push aborted." >&2
+  exit 1
+fi
+
+if [ "$(git config --get marketplace.branchProtection)" != "true" ]; then
+  cat >&2 <<'EOF'
+
+----------------------------------------------------------------------
+REMINDER: enable branch protection on `main` before relying on this repo.
+  GitHub > Settings > Branches > Add rule for `main`:
+    - Require a pull request and review from code owners (CODEOWNERS)
+    - Require status check: "Validate marketplace"
+  Without it, CODEOWNERS and CI are not enforced.
+  After enabling it, silence this reminder with:
+    git config marketplace.branchProtection true
+----------------------------------------------------------------------
+
+EOF
+fi
+
+exit 0

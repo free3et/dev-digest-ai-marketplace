@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Dev Digest Catalog</title>
+<meta name="description" content="Catalog of plugins, skills, agents, commands, hooks and MCP servers in the dev-digest marketplace for Claude Code.">
+<meta name="theme-color" content="#0d1016">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>try{if(localStorage.getItem('dd-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <button class="logo" data-go="home" data-i18n-attr="aria-label:nf.home" aria-label="Go home"><i>dd</i><span>dev-digest</span></button>
+    <div class="sbox">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3.5 3.5"/></svg>
+      <input id="gq" type="search" data-i18n-attr="placeholder:hdr.search;aria-label:hdr.searchAria" placeholder="Search: a code review skill, a test agent…" autocomplete="off" aria-label="Search the catalog">
+    </div>
+    <nav data-i18n-attr="aria-label:hdr.nav" aria-label="Main navigation">
+      <button class="nl" data-go="new" data-nav="new" data-i18n="home.news">What's new</button>
+      <button class="nl" data-go="start" data-nav="start" data-i18n="home.connect">Connect</button>
+      <button class="nl" data-go="saved" data-nav="saved" data-i18n="sv.title">Saved</button>
+      <button class="ib" data-go="install" data-i18n-attr="aria-label:kit.title" aria-label="Install kit"><span data-i18n="hdr.kit">Kit</span> <span class="cnt" id="cartCnt">0</span></button>
+      <button class="ib" id="themeBtn" data-i18n-attr="aria-label:hdr.theme" aria-label="Toggle theme">Light</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <main id="app"></main>
+  <footer class="foot">
+    <span id="footNote"></span>
+    <span><a href="https://github.com/free3et/dev-digest-ai-marketplace" target="_blank" rel="noopener noreferrer">GitHub</a> · <button class="link" data-go="contribute" data-i18n="c.eyebrow">Contributing</button></span>
+  </footer>
+</div>
+<div id="toast" class="toast" role="status" hidden></div>
+<noscript><p style="padding:24px">The catalog needs JavaScript to run.</p></noscript>
+<script src="app.js"></script>
+</body>
+</html>

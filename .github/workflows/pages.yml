@@ -1,0 +1,44 @@
+name: Deploy catalog site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'plugins/**'
+      - '.claude-plugin/**'
+      - 'scripts/build-site.mjs'
+      - 'scripts/lib.mjs'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # git history gives per-file update dates
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build catalog data
+        run: node scripts/build-site.mjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
