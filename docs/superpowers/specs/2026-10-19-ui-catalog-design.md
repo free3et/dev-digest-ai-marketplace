@@ -35,39 +35,40 @@ The marketplace (`dev-digest-ai-marketplace`) consists of plugins that contain s
 - GitHub Pages: static files only, no server code.
 - Any "dynamic" functionality works in one of three ways: computed at build time, computed in the browser, or read from the public GitHub API (read-only, respecting the unauthenticated rate limit).
 - Build and deploy run through GitHub Actions.
-- The catalog must work without a JavaScript framework that pulls in large dependencies. Initial load up to 300 KB gzip excluding data **[my decision]**.
-- The repository is currently empty. The design cannot rely on existing plugins, so the mockups use test data (section 9).
+- Initial JavaScript load stays under about 100 KB gzip (currently about 78 KB), excluding the catalog data.
+- Only real repository content is shown. Plugins are added over time, so every screen has an empty state.
 
 ## 4. Architecture
 
 ### 4.1. Data pipeline (build time)
 
-A GitHub Action on every push to `main`:
+`scripts/catalog.mjs` indexes the repository as it is right now:
 
 1. Reads `.claude-plugin/marketplace.json`.
-2. For each plugin, reads `plugin.json` (if present) and walks `skills/*/SKILL.md`, `agents/*.md`, `commands/*.md`, `hooks/hooks.json`, `.mcp.json`, `CHANGELOG.md`.
-3. Parses frontmatter (`name`, `description`, `keywords`, `tools`, `model`, etc.) and the markdown body.
-4. Computes derived data: statistics, the "what runs" list (hooks, MCP, commands), the last change date from `git log`, and the validation state from `claude plugin validate --strict`.
-5. Writes the build artifacts:
-   - `catalog.json`: all artifacts with metadata (without full texts);
-   - `search-index.json`: the search index (with body text);
-   - `artifacts/<id>.json`: the full content of a single artifact page;
-   - `releases.json`: the release feed;
-   - `feed.xml`: RSS/Atom.
-6. Publishes to Pages.
+2. For each plugin that lives in `plugins/`, reads `plugin.json` and walks `skills/*/SKILL.md`, `agents/*.md`, `commands/*.md`, `hooks/hooks.json`, `.mcp.json`, `CHANGELOG.md` (Keep a Changelog format).
+3. Parses the flat frontmatter (`name`, `description`, `allowed-tools`, `tools`, `model`, `keywords`) and keeps the file text (clipped to 6000 characters).
+4. Computes derived data: the "what runs" list (hooks, MCP, commands), the last change date from `git log`, release history from the changelog, and a health status with reason codes.
+5. Returns one `catalog.json` document. A Vite plugin (`site/vite.config.js`) serves it at `/catalog.json` in development and emits it into `site/dist` on build.
 
-An invalid plugin does not block the catalog build. It appears with the status "validation error" (see 6.6).
+Only real data is shown. There is no sample or demo data: with no plugins the site shows an empty state. Plugins with an external `source` are listed with limited data and a warning, because their contents are not in this repository. An invalid plugin does not block the build; it appears with the status "error" and the reasons.
 
-### 4.2. Client (runtime)
+### 4.2. CI and deployment
 
-A static SPA with hash routing (`#/...`), because Pages cannot fall back to `index.html` for arbitrary paths. Search runs in the browser. Search and filter state lives in the URL. Personal data (bookmarks, the install kit, theme) lives in `localStorage`.
+`.github/workflows/pages.yml` runs on pull requests (test and build) and on pushes to `main` (test, build, deploy). The deploy step uses the official Pages actions, so Settings → Pages → Source must be "GitHub Actions". The checkout uses full history so that update dates come from git.
 
-### 4.3. Technical choices **[my decision]**
+### 4.3. Client (runtime)
 
-- Build: Vite. UI: Preact (or plain JS if the design allows it).
-- Search: MiniSearch.
-- Markdown renderer with HTML sanitization (SKILL.md content is considered untrusted).
-- Build script: Node.
+React 19 single-page app built with Vite (`base: './'`, so assets resolve under `/<repo>/`). Routing is hash based (`#/...`), because Pages cannot fall back to `index.html` for arbitrary paths. Search runs in the browser; the query and filters live in the URL. Personal data (bookmarks, the install kit, theme) lives in `localStorage`. React escapes all repository text by default.
+
+### 4.4. Local development
+
+`npm install`, then `npm run dev` starts the Vite dev server. The catalog is re-indexed on every request, and the page reloads when anything under `plugins/` or `.claude-plugin/` changes. `npm run build` and `npm run preview` check the production build, `npm test` runs the unit tests (search and routing), `npm run catalog` prints what the site would list. The built site needs an HTTP server; it does not work from `file://`.
+
+### 4.5. Technical choices
+
+- Build: Vite. UI: React (plain JavaScript, no TypeScript).
+- Search: a small in-house scorer (`site/src/lib/search.js`) with field weights and a simple stemmer, covered by unit tests. A library such as MiniSearch is the next step if the catalog grows large.
+- No markdown renderer yet; file content is shown as code.
 
 ## 5. Data model
 

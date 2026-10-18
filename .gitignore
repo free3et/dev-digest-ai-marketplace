@@ -1,4 +1,4 @@
 node_modules/
 .DS_Store
 *.log
-site/data/catalog.js
+site/dist/

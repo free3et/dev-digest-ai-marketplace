@@ -1,13 +1,11 @@
-#!/usr/bin/env node
-// Builds site/data/catalog.js for the GitHub Pages catalog UI.
-// Reads .claude-plugin/marketplace.json and every plugin that lives in this repository.
-// Node >= 20, no dependencies.
+// Indexes the marketplace for the catalog UI (site/). Used by the Vite plugin in site/ and by `npm run catalog`.
+// Reads .claude-plugin/marketplace.json and every plugin that lives in this repository. No dependencies.
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { MARKETPLACE_FILE, ROOT, readJson } from './lib.mjs';
 
-const OUT = join(ROOT, 'site', 'data', 'catalog.js');
 const MAX_CONTENT = 6000;
 const REPO = process.env.GITHUB_REPOSITORY || 'free3et/dev-digest-ai-marketplace';
 
@@ -134,25 +132,32 @@ function indexPlugin(entry, dir) {
   return { plugin, arts };
 }
 
-const marketplace = readJson(MARKETPLACE_FILE);
-const plugins = [];
-const artifacts = [];
-for (const entry of marketplace.plugins || []) {
-  const src = entry.source;
-  const local = typeof src === 'string' && src.startsWith('./') ? join(ROOT, src) : null;
-  if (local && isDir(local)) {
-    const { plugin, arts } = indexPlugin(entry, local);
-    plugins.push(plugin);
-    artifacts.push(...arts);
-  } else {
-    plugins.push({
-      name: entry.name, ver: entry.version || '', cat: entry.category || 'Other', desc: entry.description || '', updated: new Date().toISOString(),
-      tags: entry.tags || [], kw: entry.tags || [], external: true, health: 'warn',
-      healthCodes: ['external'], log: [],
-    });
+/** Builds the catalog from the repository as it is right now. */
+export function buildCatalog() {
+  const marketplace = readJson(MARKETPLACE_FILE);
+  const plugins = [];
+  const artifacts = [];
+  for (const entry of marketplace.plugins || []) {
+    const src = entry.source;
+    const local = typeof src === 'string' && src.startsWith('./') ? join(ROOT, src) : null;
+    if (local && isDir(local)) {
+      const { plugin, arts } = indexPlugin(entry, local);
+      plugins.push(plugin);
+      artifacts.push(...arts);
+    } else {
+      plugins.push({
+        name: entry.name, ver: entry.version || '', cat: entry.category || 'Other', desc: entry.description || '', updated: new Date().toISOString(),
+        tags: entry.tags || [], kw: entry.tags || [], external: true, health: 'warn',
+        healthCodes: ['external'], log: [],
+      });
+    }
   }
+  return { meta: { repo: REPO, marketplace: marketplace.name, generatedAt: new Date().toISOString() }, plugins, artifacts };
 }
 
-mkdirSync(join(ROOT, 'site', 'data'), { recursive: true });
-writeFileSync(OUT, `window.__CATALOG__=${JSON.stringify({ meta: { demo: false, repo: REPO, marketplace: marketplace.name, generatedAt: new Date().toISOString() }, plugins, artifacts })};\n`);
-console.log(`catalog: ${plugins.length} plugin(s), ${artifacts.length} artifact(s) -> ${posix(OUT)}`);
+// `npm run catalog` prints a summary, handy when checking what the site will show.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const c = buildCatalog();
+  console.log(`${c.plugins.length} plugin(s), ${c.artifacts.length} artifact(s)`);
+  for (const p of c.plugins) console.log(`  ${p.name}@${p.ver} [${p.health}] ${c.artifacts.filter((a) => a.plugin === p.name).length} artifact(s)`);
+}

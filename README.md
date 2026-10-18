@@ -32,19 +32,19 @@ None yet. The catalog lives in [`.claude-plugin/marketplace.json`](.claude-plugi
 |---|---|
 | `.claude-plugin/marketplace.json` | The catalog: marketplace metadata and the list of plugins |
 | `plugins/` | One directory per plugin that lives in this repository |
-| `scripts/` | Dependency-free Node scripts: `validate-marketplace`, `release`, `rollback`, `build-site` |
-| `site/` | Static catalog UI for GitHub Pages. Separate from the marketplace; see below |
+| `scripts/` | Dependency-free Node scripts: `validate-marketplace`, `release`, `rollback`, `catalog` |
+| `site/` | React + Vite catalog UI for GitHub Pages. Separate from the marketplace; see below |
 | `docs/` | Plugin guidelines, security policy, release process |
 | `.github/` | CI workflow and pull request template |
 
 ## Catalog site
 
-`site/` is a static search UI (plugins, skills, agents, commands, hooks, MCP servers) published to GitHub Pages at https://free3et.github.io/dev-digest-ai-marketplace/. It is not part of the marketplace and Claude Code never reads it.
+`site/` is a React + Vite search UI (plugins, skills, agents, commands, hooks, MCP servers) published to GitHub Pages at https://free3et.github.io/dev-digest-ai-marketplace/. It is not part of the marketplace and Claude Code never reads it.
 
-- `node scripts/build-site.mjs` reads `.claude-plugin/marketplace.json` and `plugins/` and writes `site/data/catalog.js` (git-ignored).
-- While the repository has no plugins, the site shows the demo data from `site/data/catalog.sample.js`.
-- `.github/workflows/pages.yml` rebuilds and deploys on every push to `main`. One-time setup: Settings → Pages → Source: **GitHub Actions**.
-- Local preview: `npm run serve:site`.
+- It shows only what is really in the repository. `scripts/catalog.mjs` indexes `.claude-plugin/marketplace.json` and `plugins/`; the Vite build writes the result to `catalog.json` next to the page. With no plugins, the site shows an empty state.
+- `npm install` once, then `npm run dev` starts a local server at http://localhost:5173. It re-indexes on every request and reloads the page when anything under `plugins/` or `.claude-plugin/` changes.
+- `npm run build` writes `site/dist`; `npm run preview` serves it. `npm test` runs the unit tests. `npm run catalog` prints what the site would list.
+- `.github/workflows/pages.yml` tests and builds on pull requests, and deploys on every push to `main`. One-time setup: Settings → Pages → Source: **GitHub Actions**.
 
 ## Documentation
 
@@ -55,7 +55,7 @@ None yet. The catalog lives in [`.claude-plugin/marketplace.json`](.claude-plugi
 
 ## Maintainer commands
 
-Requires Node 20 or newer. No `npm install` is needed.
+Requires Node 20.19 or newer. The maintenance scripts need no `npm install`; the catalog site does (`npm install`, then `npm run dev`).
 
 ```bash
 node scripts/validate-marketplace.mjs --strict   # lint the catalog and plugins

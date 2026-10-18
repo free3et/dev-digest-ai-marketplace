@@ -1,44 +1,57 @@
-name: Deploy catalog site
+name: Catalog site
 
 on:
   push:
     branches: [main]
-    paths:
+    paths: &paths
       - 'site/**'
       - 'plugins/**'
       - '.claude-plugin/**'
-      - 'scripts/build-site.mjs'
+      - 'scripts/catalog.mjs'
       - 'scripts/lib.mjs'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/pages.yml'
+  pull_request:
+    paths: *paths
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # git history gives per-file update dates
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Build catalog data
-        run: node scripts/build-site.mjs
-      - uses: actions/configure-pages@v5
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Build the site (indexes the repository into catalog.json)
+        run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: site/dist
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4

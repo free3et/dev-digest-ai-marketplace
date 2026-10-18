@@ -176,3 +176,15 @@ button.stat:hover{background:var(--surface-2)}
 .foot{border-top:1px solid var(--line);padding-block:18px 28px;color:var(--fg-3);font:12px var(--mono);display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:10px;font-weight:600;font-size:14px;z-index:40;box-shadow:0 8px 30px rgba(0,0,0,.35)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* React version: navigation uses real links */
+a.nl,a.btn{display:inline-block}
+a.ib{display:inline-flex}
+a.stat{color:inherit}
+a.li{color:inherit}
+a.panel{display:block}
+.crumbs a{color:var(--fg-2)}
+.crumbs a:hover{color:var(--accent)}
+.nl[aria-current="page"]{color:var(--fg);background:var(--surface)}
+.link{display:inline}
+.btn[aria-pressed="true"]{background:var(--accent-soft);color:var(--fg);border:1px solid var(--accent)}

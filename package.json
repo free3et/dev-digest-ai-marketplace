@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Maintenance scripts for the dev-digest-ai-marketplace Claude Code plugin marketplace.",
   "engines": {
-    "node": ">=20"
+    "node": ">=20.19"
   },
   "scripts": {
     "setup": "git config core.hooksPath .githooks",
@@ -12,7 +12,19 @@
     "validate:strict": "node scripts/validate-marketplace.mjs --strict",
     "release": "node scripts/release.mjs",
     "rollback": "node scripts/rollback.mjs",
-    "build:site": "node scripts/build-site.mjs",
-    "serve:site": "node scripts/build-site.mjs && npx --yes serve site"
+    "dev": "vite site",
+    "build": "vite build site",
+    "preview": "vite preview site",
+    "test": "vitest run --config site/vite.config.js",
+    "catalog": "node scripts/catalog.mjs"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
   }
 }
