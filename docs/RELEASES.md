@@ -21,7 +21,7 @@ New plugins start at `0.1.0`. Use `1.0.0` when the interface is stable.
 
 ## Tags
 
-Every release has an annotated tag named `<plugin>-v<version>`, for example `code-review-v1.2.0`. Tags are the source of truth for rollback. Never move or delete a published tag.
+Every release has an annotated tag named `<plugin>--v<version>` (double dash: Claude Code resolves dependency version ranges from tags in exactly this form), for example `code-review--v1.2.0`. Tags are the source of truth for rollback. Never move or delete a published tag.
 
 ## Release a plugin
 
@@ -56,12 +56,12 @@ Rollback means **rolling forward with old content**. A lower version number woul
 ```bash
 node scripts/rollback.mjs <plugin> 1.1.0 --dry-run   # preview
 node scripts/rollback.mjs <plugin> 1.1.0             # restore v1.1.0 content as v1.2.1
-git push origin main <plugin>-v1.2.1
+git push origin main <plugin>--v1.2.1
 ```
 
 What the script does:
 
-1. Requires a clean working tree and an existing tag `<plugin>-v1.1.0` older than the current version.
+1. Requires a clean working tree and an existing tag `<plugin>--v1.1.0` older than the current version.
 2. Replaces `plugins/<plugin>/` with the content of that tag, keeping the current `CHANGELOG.md` history.
 3. Sets the version to the next patch after the highest released version and adds a changelog entry.
 4. Validates, commits as `rollback(<plugin>): restore v1.1.0 as v1.2.1` and creates the new tag. On failure it restores the working tree. It never pushes.

@@ -29,7 +29,7 @@ try {
   if (!isTreeClean()) fail('working tree is not clean. Commit or stash your changes first.');
 
   const plugin = findPlugin(pluginName);
-  const targetVersion = target.replace(`${pluginName}-v`, '').replace(/^v/, '');
+  const targetVersion = target.replace(`${pluginName}--v`, '').replace(/^v/, '');
   const targetTag = tagFor(pluginName, targetVersion);
   if (!tagExists(targetTag)) {
     const known = releasedVersions(pluginName).sort(compareVersions).join(', ') || 'none';
