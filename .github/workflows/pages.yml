@@ -1,5 +1,8 @@
 name: Catalog site
 
+# Builds and publishes the catalog UI (site/). Independent from "Validate marketplace",
+# which only lints the plugin files. Each job below shows up as its own check on a pull request.
+
 on:
   push:
     branches: [main]
@@ -24,7 +27,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test:
+    name: Site tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
   build:
+    name: Build site
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,16 +51,24 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test
       - name: Build the site (indexes the repository into catalog.json)
         run: npm run build
+      - name: Summarize the catalog
+        run: |
+          {
+            echo '### Catalog index'
+            echo '```'
+            node scripts/catalog.mjs
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist
 
   deploy:
+    name: Deploy to GitHub Pages
     if: github.ref == 'refs/heads/main'
-    needs: build
+    needs: [test, build]
     runs-on: ubuntu-latest
     permissions:
       pages: write

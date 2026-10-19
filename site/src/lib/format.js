@@ -1,25 +1,11 @@
-export const TYPE_LABEL = { plugin: 'Plugin', skill: 'Skill', agent: 'Agent', command: 'Command', hook: 'Hook', mcp: 'MCP' };
-export const TYPE_LABEL_PL = { plugin: 'Plugins', skill: 'Skills', agent: 'Agents', command: 'Commands', hook: 'Hooks', mcp: 'MCP servers' };
-
-export const HEALTH_LABEL = { ok: 'valid', warn: 'warning', err: 'error' };
-export const HEALTH_CODE = {
-  noManifest: 'plugin.json is missing or is not valid JSON.',
-  nameMismatch: 'name in marketplace.json does not match plugin.json.',
-  noDescription: 'plugin.json has no description.',
-  versionDup: 'Version is set in both plugin.json and marketplace.json. The plugin.json value wins.',
-  noLicense: 'plugin.json has no license.',
-  noChangelog: 'CHANGELOG.md is missing.',
-  badHooks: 'hooks/hooks.json is not valid JSON.',
-  badMcp: '.mcp.json is not valid JSON.',
-  external: 'The plugin lives in another repository. Its contents are not indexed.',
-};
+import { t } from './i18n.jsx';
 
 export function ago(d) {
-  if (d === 0) return 'today';
-  if (d === 1) return 'yesterday';
-  if (d < 7) return `${d} d ago`;
-  if (d < 30) return `${Math.round(d / 7)} wk ago`;
-  return `${Math.round(d / 30)} mo ago`;
+  if (d === 0) return t('time.today');
+  if (d === 1) return t('time.yesterday');
+  if (d < 7) return t('time.days', { n: d });
+  if (d < 30) return t('time.weeks', { n: Math.round(d / 7) });
+  return t('time.months', { n: Math.round(d / 30) });
 }
 
 export const daysSince = (d) => Math.max(0, Math.floor((Date.now() - new Date(d).getTime()) / 864e5));

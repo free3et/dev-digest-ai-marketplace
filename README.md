@@ -44,7 +44,8 @@ None yet. The catalog lives in [`.claude-plugin/marketplace.json`](.claude-plugi
 - It shows only what is really in the repository. `scripts/catalog.mjs` indexes `.claude-plugin/marketplace.json` and `plugins/`; the Vite build writes the result to `catalog.json` next to the page. With no plugins, the site shows an empty state.
 - `npm install` once, then `npm run dev` starts a local server at http://localhost:5173. It re-indexes on every request and reloads the page when anything under `plugins/` or `.claude-plugin/` changes.
 - `npm run build` writes `site/dist`; `npm run preview` serves it. `npm test` runs the unit tests. `npm run catalog` prints what the site would list.
-- `.github/workflows/pages.yml` tests and builds on pull requests, and deploys on every push to `main`. One-time setup: Settings → Pages → Source: **GitHub Actions**.
+- **UI text** lives in one file, `site/src/locales/en.js`, and is read through `t()` in `site/src/lib/i18n.jsx`. Components contain no literal text; `npm test` fails on a missing or unused key and on text written directly in a component. To add a language, copy `en.js`, translate the values and select it in `i18n.jsx`.
+- **CI:** `.github/workflows/pages.yml` ("Catalog site") is separate from "Validate marketplace" (which only lints plugin files) and shows three checks of its own: **Site tests**, **Build site** and, on `main` only, **Deploy to GitHub Pages**. It runs on pull requests and on pushes to `main` that touch the site, plugins or marketplace file. One-time setup: Settings → Pages → Source: **GitHub Actions**.
 
 ## Documentation
 
