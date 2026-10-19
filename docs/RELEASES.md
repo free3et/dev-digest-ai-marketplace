@@ -23,29 +23,65 @@ New plugins start at `0.1.0`. Use `1.0.0` when the interface is stable.
 
 Every release has an annotated tag named `<plugin>--v<version>` (double dash: Claude Code resolves dependency version ranges from tags in exactly this form), for example `code-review--v1.2.0`. Tags are the source of truth for rollback. Never move or delete a published tag.
 
+Tags matter for more than rollback: a plugin that depends on another one (`"version": "^1.0.0"` in its `plugin.json`) only sees a new release of the dependency once the tag `<plugin>--v<version>` exists. Without the tag, the dependent plugin keeps the old version. Always create the tag.
+
 ## Release a plugin
 
-1. Merge the changes to `main`. Make sure `plugins/<name>/CHANGELOG.md` lists them under `## [Unreleased]`.
-2. Preview:
+`main` is protected, so a release is a pull request and the tag is created on `main` after the merge.
+
+1. Branch from an up-to-date `main` and make the change. List it under `## [Unreleased]` in `plugins/<name>/CHANGELOG.md`.
+2. On the branch, preview and then release (`patch`, `minor`, `major` or an explicit `X.Y.Z`):
    ```bash
    node scripts/release.mjs <plugin> patch --dry-run
+   node scripts/release.mjs <plugin> patch
    ```
-3. Release (`patch`, `minor`, `major` or an explicit `X.Y.Z`):
+   The script requires a clean working tree, validates the marketplace, bumps `plugin.json`, turns `[Unreleased]` into a dated section, commits as `release(<plugin>): vX.Y.Z` and creates a local tag. It never pushes. It prints a warning when you are not on `main`; that is expected here.
+3. **Delete the local tag**, because it points at a commit on the branch (which disappears if the PR is squash-merged). The tag is recreated on `main` in step 5:
    ```bash
-   node scripts/release.mjs <plugin> minor
+   git tag -d <plugin>--v<version>
    ```
-   The script requires a clean working tree, validates the marketplace, bumps `plugin.json`, turns `[Unreleased]` into a dated section, commits as `release(<plugin>): vX.Y.Z` and creates the tag. It never pushes.
-4. Review (`git show <tag>`), then publish:
+4. Push the branch, open a pull request and merge it once the checks are green.
+5. Update `main`, then create and push the tag from the plugin directory. The command validates the plugin, checks that the versions in `plugin.json` and the marketplace entry agree, and refuses to overwrite an existing tag (use `--dry-run` to preview):
    ```bash
-   git push origin main <tag>
+   git checkout main && git pull
+   (cd plugins/<plugin> && claude plugin tag --push)
    ```
+
+When two plugins change together (for example a dependency and a dependent), tag the dependency first.
 
 ## Update (user side)
 
+### Automatic updates
+
+Claude Code turns auto-update on by default only for Anthropic's own marketplaces. For this one it is **off** until the user enables it:
+
+1. In a session, run `/plugin` and open the **Marketplaces** tab.
+2. Select `dev-digest-ai-marketplace` and choose **Enable auto-update**.
+
+How it behaves:
+- After the first message of an interactive session Claude Code waits a random time of up to ten minutes, then refreshes the marketplace and updates the installed plugins.
+- The running session keeps the versions it loaded and shows `Plugin updated: <name> · Run /reload-plugins to apply`. The next session loads the new versions.
+- A plugin only updates when its version changes, which is why releases always bump `version` in `plugin.json`.
+- Auto-update is switched off by the environment variables `DISABLE_AUTOUPDATER`, `DISABLE_UPDATES` and `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`.
+- The marketplace is cloned over the transport you added it with. For background updates over SSH, the key must work without a passphrase prompt.
+
+### Manual updates
+
 ```bash
-claude plugin marketplace update dev-digest-ai-marketplace
-claude plugin update <plugin>@dev-digest-ai-marketplace
+claude plugin marketplace update dev-digest-ai-marketplace   # refreshes the catalog only
+claude plugin update <plugin>@dev-digest-ai-marketplace      # updates one plugin
 ```
+
+`marketplace update` does not touch installed plugins; run `plugin update` for each one. A dependency is updated to the highest tag that satisfies the range of the plugin that needs it, so the output can read `updated from 1.0.0-… to 1.0.1-… (highest tag satisfying ^1.0.0 from <plugin>)`. Running sessions need a restart to load the new version.
+
+### Check that an update arrived
+
+```bash
+claude plugin list | grep -A2 <plugin>
+ls ~/.claude/plugins/cache/dev-digest-ai-marketplace/<plugin>/
+```
+
+A tag-resolved version carries a 12-character commit suffix, for example `1.0.1-0147707d816e`.
 
 Users can also pin a catalog channel by adding the marketplace with a ref, for example `free3et/dev-digest-ai-marketplace#<tag-or-branch>`.
 
@@ -56,8 +92,9 @@ Rollback means **rolling forward with old content**. A lower version number woul
 ```bash
 node scripts/rollback.mjs <plugin> 1.1.0 --dry-run   # preview
 node scripts/rollback.mjs <plugin> 1.1.0             # restore v1.1.0 content as v1.2.1
-git push origin main <plugin>--v1.2.1
 ```
+
+`main` is protected, so publish the rollback like a release: run the script on a branch, delete the local tag it created (`git tag -d <plugin>--v1.2.1`), push the branch, merge the pull request, then tag on `main` with `(cd plugins/<plugin> && claude plugin tag --push)`. See [Release a plugin](#release-a-plugin).
 
 What the script does:
 
@@ -72,7 +109,7 @@ After a rollback, fix the problem on a branch and release a new version as usual
 
 | Situation | Action |
 |---|---|
-| Broken release, need to stop the damage now | Run the rollback, push the commit and tag. Users get it on their next `plugin update`. |
+| Broken release, need to stop the damage now | Run the rollback on a branch, merge the PR, then tag on `main`. Users get it on their next `plugin update`, or automatically if they enabled auto-update. |
 | Plugin is dangerous and must disappear | Remove the entry from `marketplace.json`, add it to `renames` with `null`, and set `forceRemoveDeletedPlugins: true` so it is uninstalled on users' machines. |
 | Plugin is renamed | Add `"old-name": "new-name"` to `renames`. |
 | Bad commit in an external plugin | Change its `sha` back to the last good commit in `marketplace.json`. |
@@ -86,4 +123,4 @@ There is no deprecation state in Claude Code. Announce deprecations in the plugi
 - [ ] Changelog is accurate and in English
 - [ ] Security checklist in [SECURITY.md](SECURITY.md) was applied to hooks, scripts and MCP changes
 - [ ] Installed the plugin from a local checkout and confirmed it works (`claude plugin marketplace add .`)
-- [ ] Tag pushed together with the commit
+- [ ] Tag `<plugin>--v<version>` created on `main` after the merge and pushed (`claude plugin tag --push`)

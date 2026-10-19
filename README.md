@@ -13,18 +13,31 @@ claude plugin install <plugin>@dev-digest-ai-marketplace
 
 Inside a Claude Code session the same commands are `/plugin marketplace add ...` and `/plugin install ...`.
 
-To get updates, refresh the catalog first and then update the plugin:
+Installing a plugin that depends on others (for example `sdd-engineering`) installs the dependencies too.
+
+### Updates
+
+Third-party marketplaces **do not auto-update by default**. To turn it on, run `/plugin`, open the **Marketplaces** tab, select `dev-digest-ai-marketplace` and choose **Enable auto-update**. After that, a few minutes after you send the first message of a session, Claude Code refreshes this catalog and updates the installed plugins. The running session keeps its current versions; the next session loads the new ones.
+
+To update by hand, refresh the catalog first and then update the plugin:
 
 ```bash
 claude plugin marketplace update dev-digest-ai-marketplace
 claude plugin update <plugin>@dev-digest-ai-marketplace
 ```
 
-Third-party marketplaces do not auto-update by default. You can enable auto-update for this marketplace in the `/plugin` menu.
+Details, rollback and the release process are in [docs/RELEASES.md](docs/RELEASES.md).
 
 ## Available plugins
 
-None yet. The catalog lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
+| Plugin | What it provides | Depends on |
+|---|---|---|
+| [`sdd-engineering`](plugins/sdd-engineering/README.md) | Spec Driven Development workflow: `spec-creator`, `implementation-planner`, `implementer` and `plan-verifier` agents, plus `run-plan` and `workflow-retro` skills | the three plugins below |
+| [`engineering-paved-path`](plugins/engineering-paved-path/README.md) | Ten skills: React, Next.js, Fastify, layered architecture, testing, security, Zod, TypeScript, Mermaid | none |
+| [`research-tools`](plugins/research-tools/README.md) | Read-only `researcher` agent | none |
+| [`architecture-review`](plugins/architecture-review/README.md) | Read-only `architecture-reviewer` agent | `engineering-paved-path` |
+
+The catalog lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json); the site below lists everything with search.
 
 ## Repository layout
 
