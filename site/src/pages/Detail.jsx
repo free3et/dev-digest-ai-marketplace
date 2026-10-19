@@ -105,6 +105,13 @@ export function PluginPage({ name }) {
               ? <p className="note" style={{ color: `var(--${p.health === 'err' ? 'err' : 'warn'})` }}>{p.healthCodes.map((x) => HEALTH_CODE[x] || x).join(' ')}</p>
               : <p className="note">No issues found by the catalog checks.</p>}
           </section>
+          {p.deps.length > 0 && (
+            <section className="panel">
+              <h3>Dependencies · {p.deps.length}</h3>
+              <div className="list">{p.deps.map((d) => <Link key={d.name} className="li" to={{ name: 'plugin', arg: d.name }}><span className="ln">{d.name}</span><span className="sp" /><span className="dim mono">{d.range || 'any version'}</span></Link>)}</div>
+              <p className="note">Installed automatically with this plugin.</p>
+            </section>
+          )}
           <SecurityPanel list={list} />
         </div>
       </div>
