@@ -1,6 +1,7 @@
 import { CodeBlock, Crumbs, FileLabel, FreshPill, HealthPill, InstallPanel, Link, SecurityPanel, Timeline, TypeBadge } from '../components/ui.jsx';
 import { useApp } from '../lib/context.jsx';
-import { HEALTH_CODE, ago, fileOf, ghUrl } from '../lib/format.js';
+import { ago, fileOf, ghUrl } from '../lib/format.js';
+import { healthCode, t } from '../lib/i18n.jsx';
 import NotFound from './NotFound.jsx';
 
 /** Synthesized preview for artifacts whose file text is not in the catalog. */
@@ -17,9 +18,9 @@ function Actions({ a }) {
   return (
     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
       {a.type !== 'plugin' && (
-        <button type="button" className="btn ghost sm" aria-pressed={prefs.saved.has(a.id)} onClick={() => toggleSaved(a.id)}>{prefs.saved.has(a.id) ? '★ Saved' : '☆ Save'}</button>
+        <button type="button" className="btn ghost sm" aria-pressed={prefs.saved.has(a.id)} onClick={() => toggleSaved(a.id)}>{prefs.saved.has(a.id) ? t('detail.saved') : t('detail.save')}</button>
       )}
-      {!plugin.external && <a className="btn ghost sm" href={ghUrl(catalog, a)} target="_blank" rel="noopener noreferrer">Open on GitHub ↗</a>}
+      {!plugin.external && <a className="btn ghost sm" href={ghUrl(catalog, a)} target="_blank" rel="noopener noreferrer">{t('detail.openGithub')}</a>}
     </div>
   );
 }
@@ -45,11 +46,11 @@ export function Artifact() {
       </div>
       <div className="cols">
         <div className="stack">
-          {a.use && <section className="panel prose"><h3>When to use</h3><ul>{a.use.map((u) => <li key={u}>{u}</li>)}</ul></section>}
-          <section className="panel"><h3>Content <FileLabel a={a} /></h3><CodeBlock text={preview(a)} /></section>
+          {a.use && <section className="panel prose"><h3>{t('detail.whenToUse')}</h3><ul>{a.use.map((u) => <li key={u}>{u}</li>)}</ul></section>}
+          <section className="panel"><h3>{t('detail.content')} <FileLabel a={a} /></h3><CodeBlock text={preview(a)} /></section>
           {sibs.length > 0 && (
             <section className="panel">
-              <h3>More in {a.plugin}</h3>
+              <h3>{t('detail.moreIn', { plugin: a.plugin })}</h3>
               <div className="list">{sibs.map((s) => <Link key={s.id} className="li" to={{ name: 'artifact', arg: s.id }}><TypeBadge type={s.type} /><span className="ln">{s.name}</span><span className="sp" /><span className="dim" style={{ fontSize: 13 }}>→</span></Link>)}</div>
             </section>
           )}
@@ -83,28 +84,35 @@ export function PluginPage({ name }) {
       <div className="cols">
         <div className="stack">
           <section className="panel">
-            <h3>Plugin contents · {list.length}</h3>
+            <h3>{t('detail.contents', { n: list.length })}</h3>
             {list.length ? (
               <div className="list">{list.map((s) => <Link key={s.id} className="li" to={{ name: 'artifact', arg: s.id }}><TypeBadge type={s.type} /><span className="ln">{s.name}</span><span className="sp" /><span className="dim" style={{ fontSize: 13, maxWidth: '30ch', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.desc}</span></Link>)}</div>
-            ) : <p className="muted" style={{ margin: 0 }}>No components are indexed for this plugin.</p>}
+            ) : <p className="muted" style={{ margin: 0 }}>{t('detail.noComponents')}</p>}
           </section>
-          {!p.external && <section className="panel"><h3>File structure</h3><div className="tree">{tree}</div></section>}
-          {p.log.length > 0 && <section className="panel"><h3>Change history</h3><Timeline compact items={p.log.map((l) => ({ plugin: p.name, ver: l.ver, days: l.days, notes: l.notes }))} /></section>}
+          {!p.external && <section className="panel"><h3>{t('detail.fileStructure')}</h3><div className="tree">{tree}</div></section>}
+          {p.log.length > 0 && <section className="panel"><h3>{t('detail.changeHistory')}</h3><Timeline compact items={p.log.map((l) => ({ plugin: p.name, ver: l.ver, days: l.days, notes: l.notes }))} /></section>}
         </div>
         <div className="stack">
           <InstallPanel plugin={p.name} />
           <section className="panel">
-            <h3>Status</h3>
+            <h3>{t('detail.status')}</h3>
             <dl className="kv">
-              <dt>Version</dt><dd className="mono">{p.ver || '—'}</dd>
-              <dt>Category</dt><dd>{p.cat}</dd>
-              <dt>Updated</dt><dd>{ago(p.days)}</dd>
-              <dt>Validation</dt><dd><HealthPill plugin={p} /></dd>
+              <dt>{t('detail.version')}</dt><dd className="mono">{p.ver || t('common.none')}</dd>
+              <dt>{t('detail.category')}</dt><dd>{p.cat}</dd>
+              <dt>{t('detail.updated')}</dt><dd>{ago(p.days)}</dd>
+              <dt>{t('detail.validation')}</dt><dd><HealthPill plugin={p} /></dd>
             </dl>
             {p.healthCodes.length
-              ? <p className="note" style={{ color: `var(--${p.health === 'err' ? 'err' : 'warn'})` }}>{p.healthCodes.map((x) => HEALTH_CODE[x] || x).join(' ')}</p>
-              : <p className="note">No issues found by the catalog checks.</p>}
+              ? <p className="note" style={{ color: `var(--${p.health === 'err' ? 'err' : 'warn'})` }}>{p.healthCodes.map((x) => healthCode(x)).join(' ')}</p>
+              : <p className="note">{t('detail.noIssues')}</p>}
           </section>
+          {p.deps.length > 0 && (
+            <section className="panel">
+              <h3>{t('detail.deps', { n: p.deps.length })}</h3>
+              <div className="list">{p.deps.map((d) => <Link key={d.name} className="li" to={{ name: 'plugin', arg: d.name }}><span className="ln">{d.name}</span><span className="sp" /><span className="dim mono">{d.range || t('detail.anyVersion')}</span></Link>)}</div>
+              <p className="note">{t('detail.depsNote')}</p>
+            </section>
+          )}
           <SecurityPanel list={list} />
         </div>
       </div>

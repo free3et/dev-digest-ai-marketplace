@@ -4,5 +4,26 @@
   "owner": {
     "name": "free3et"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "engineering-paved-path",
+      "source": "./plugins/engineering-paved-path",
+      "description": "Reusable engineering skills: React, Next.js, Fastify, layered architecture, testing, security, Zod and TypeScript."
+    },
+    {
+      "name": "research-tools",
+      "source": "./plugins/research-tools",
+      "description": "Read-only researcher agent that answers concrete questions from a repository and external sources, with evidence."
+    },
+    {
+      "name": "architecture-review",
+      "source": "./plugins/architecture-review",
+      "description": "Read-only architecture reviewer agent that checks changes against layering and boundary rules."
+    },
+    {
+      "name": "sdd-engineering",
+      "source": "./plugins/sdd-engineering",
+      "description": "Spec Driven Development workflow: spec-creator, implementation-planner, implementer and plan-verifier agents plus run-plan and workflow-retro skills."
+    }
+  ]
 }

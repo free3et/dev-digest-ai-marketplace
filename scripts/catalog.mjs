@@ -25,14 +25,26 @@ function lastModified(path) {
   return statSync(path).mtime.toISOString();
 }
 
-/** Minimal frontmatter reader: flat `key: value` pairs only. */
-function frontmatter(text) {
+/** Minimal frontmatter reader: `key: value` pairs, plus folded (`>`) and literal (`|`) block scalars. */
+export function frontmatter(text) {
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   const fm = {};
   if (!m) return fm;
-  for (const line of m[1].split(/\r?\n/)) {
-    const kv = line.match(/^([A-Za-z][\w-]*):\s*(.*)$/);
-    if (kv) fm[kv[1]] = kv[2].replace(/^["']|["']$/g, '').trim();
+  const lines = m[1].split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    const kv = lines[i].match(/^([A-Za-z][\w-]*):\s*(.*)$/);
+    if (!kv) continue;
+    const block = kv[2].match(/^([>|])[+-]?$/);
+    if (!block) {
+      fm[kv[1]] = kv[2].replace(/^["']|["']$/g, '').trim();
+      continue;
+    }
+    const body = [];
+    while (i + 1 < lines.length && (/^\s+\S/.test(lines[i + 1]) || lines[i + 1].trim() === '')) {
+      i += 1;
+      body.push(lines[i].trim());
+    }
+    fm[kv[1]] = (block[1] === '>' ? body.join(' ').replace(/\s+/g, ' ') : body.join('\n')).trim();
   }
   return fm;
 }
@@ -53,6 +65,14 @@ function parseChangelog(path) {
     if (cur && b && cur.notes.length < 6) cur.notes.push(b[1]);
   }
   return out;
+}
+
+/** Plugin dependencies from plugin.json as `{ name, range }`, `range` empty when unconstrained. */
+function dependencies(manifest) {
+  if (!manifest || !Array.isArray(manifest.dependencies)) return [];
+  return manifest.dependencies
+    .map((d) => (typeof d === 'string' ? { name: d.split('@')[0], range: '' } : { name: d && d.name, range: (d && d.version) || '' }))
+    .filter((d) => typeof d.name === 'string' && d.name);
 }
 
 function indexPlugin(entry, dir) {
@@ -124,7 +144,7 @@ function indexPlugin(entry, dir) {
   const log = parseChangelog(changelogPath).filter((r) => r.date || r.ver === version);
   const plugin = {
     name, ver: version, cat: entry.category || 'Other', desc: (manifest && manifest.description) || entry.description || '',
-    updated, path: rel, tags, kw: [...new Set([...(tags || []), ...((manifest && manifest.keywords) || [])])],
+    updated, path: rel, tags, deps: dependencies(manifest), kw: [...new Set([...(tags || []), ...((manifest && manifest.keywords) || [])])],
     health: problems.length ? 'err' : warnings.length ? 'warn' : 'ok',
     healthCodes: [...problems, ...warnings],
     log: log.length ? log : [{ ver: version, date: updated, notes: [] }],

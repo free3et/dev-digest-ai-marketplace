@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from './components/ui.jsx';
 import { fetchCatalog } from './lib/catalog.js';
 import { AppProvider, useApp } from './lib/context.jsx';
+import { dateLocale, rich, t } from './lib/i18n.jsx';
 import { EMPTY_FILTERS } from './lib/route.js';
 import Catalog from './pages/Catalog.jsx';
 import { Artifact, PluginPage } from './pages/Detail.jsx';
@@ -23,17 +24,17 @@ function Header() {
   return (
     <header className="bar">
       <div className="wrap">
-        <Link className="logo" to={{ name: 'home' }} aria-label="Go home"><i>dd</i><span>dev-digest</span></Link>
+        <Link className="logo" to={{ name: 'home' }} aria-label={t('header.goHome')}><i>{t('header.brandMark')}</i><span>{t('header.brandName')}</span></Link>
         <div className="sbox">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5" /><path d="m10.5 10.5 3.5 3.5" /></svg>
-          <input type="search" value={q} onChange={onChange} placeholder="Search: a code review skill, a test agent…" autoComplete="off" aria-label="Search the catalog" />
+          <input type="search" value={q} onChange={onChange} placeholder={t('header.searchPlaceholder')} autoComplete="off" aria-label={t('header.searchLabel')} />
         </div>
-        <nav aria-label="Main navigation">
-          {nav('new', "What's new")}
-          {nav('start', 'Connect')}
-          {nav('saved', 'Saved')}
-          <Link className="ib" to={{ name: 'install' }} aria-label="Install kit">Kit <span className="cnt">{prefs.cart.size}</span></Link>
-          <button type="button" className="ib" onClick={toggleTheme} aria-label="Toggle theme">{theme === 'light' ? 'Dark' : 'Light'}</button>
+        <nav aria-label={t('header.navLabel')}>
+          {nav('new', t('header.whatsNew'))}
+          {nav('start', t('header.connect'))}
+          {nav('saved', t('header.saved'))}
+          <Link className="ib" to={{ name: 'install' }} aria-label={t('header.kitLabel')}>{t('header.kit')} <span className="cnt">{prefs.cart.size}</span></Link>
+          <button type="button" className="ib" onClick={toggleTheme} aria-label={t('header.themeToggle')}>{theme === 'light' ? t('header.themeDark') : t('header.themeLight')}</button>
         </nav>
       </div>
     </header>
@@ -42,11 +43,11 @@ function Header() {
 
 function Footer() {
   const { catalog } = useApp();
-  const built = new Date(catalog.meta.generatedAt).toLocaleDateString('en-GB');
+  const built = new Date(catalog.meta.generatedAt).toLocaleDateString(dateLocale());
   return (
     <footer className="foot">
-      <span>Catalog built from the repository {built}.</span>
-      <span><a href={`https://github.com/${catalog.meta.repo}`} target="_blank" rel="noopener noreferrer">GitHub</a> · <Link className="link" to={{ name: 'contribute' }}>Contributing</Link></span>
+      <span>{t('footer.built', { date: built })}</span>
+      <span><a href={`https://github.com/${catalog.meta.repo}`} target="_blank" rel="noopener noreferrer">{t('footer.github')}</a> · <Link className="link" to={{ name: 'contribute' }}>{t('footer.contributing')}</Link></span>
     </footer>
   );
 }
@@ -67,7 +68,7 @@ function Routes() {
   }
 }
 
-function Shell() {
+export function Shell() {
   const { toast } = useApp();
   return (
     <>
@@ -90,8 +91,8 @@ export default function App() {
   return (
     <div className="wrap" style={{ padding: '60px 0' }}>
       {state.status === 'loading'
-        ? <p className="muted">Loading…</p>
-        : <div className="empty"><h3>Could not load the catalog</h3><p style={{ margin: 0 }}>{String(state.error.message)}. Run <span className="mono">npm run dev</span> or open the deployed site.</p></div>}
+        ? <p className="muted">{t('app.loading')}</p>
+        : <div className="empty"><h3>{t('app.errorTitle')}</h3><p style={{ margin: 0 }}>{rich('app.errorBody', { message: String(state.error.message) })}</p></div>}
     </div>
   );
 }

@@ -26,12 +26,19 @@ DevDigest contains a working Spec Driven Development (SDD) chain of subagents an
 
 ## 3. Plugin map
 
+```mermaid
+graph TD
+  SDD["sdd-engineering 1.0.0<br/>agents: spec-creator, implementation-planner,<br/>implementer, plan-verifier<br/>skills: sdd-spec, run-plan, workflow-retro"]
+  AR["architecture-review 1.0.0<br/>agent: architecture-reviewer"]
+  RT["research-tools 1.0.0<br/>agent: researcher"]
+  EPP["engineering-paved-path 1.0.0<br/>10 skills: React, Next.js, Fastify,<br/>onion/UI architecture, testing, security,<br/>zod, typescript, mermaid"]
+  SDD -->|"^1.0.0"| AR
+  SDD -->|"^1.0.0"| RT
+  SDD -->|"^1.0.0"| EPP
+  AR -->|"^1.0.0"| EPP
 ```
-engineering-paved-path   (skills only)             no dependencies
-research-tools           (agent: researcher)       no dependencies
-architecture-review      (agent: architecture-reviewer)   no dependencies
-sdd-engineering          (4 agents, 3 skills)      depends on the three above, ^1.0.0
-```
+
+Declared in each `plugin.json` (`dependencies`); an arrow means "needs". Installing `sdd-engineering` installs all three others. `architecture-review` pulls in `engineering-paved-path` on its own. `research-tools` and `engineering-paved-path` are leaves.
 
 All four live in `plugins/<name>/` and start at version `1.0.0` **[my decision]**: the `^1.0.0` range on the slide requires it, and `docs/PLUGIN-GUIDELINES.md` allows `1.0.0` once the interface is stable.
 
@@ -47,7 +54,7 @@ Supplies reusable, stack-level knowledge. No agents, hooks or scripts.
 | Security | `security` |
 | Cross-cutting | `zod`, `typescript-expert`, `mermaid-diagram` |
 
-Rules for ported skills: keep `SKILL.md` and its `references/` or `rules/` files; keep `evals/` where they exist (`onion-architecture`); drop DevDigest fixtures and paths from skill text; keep a `SOURCES.md` where the original has one, so provenance stays visible.
+Rules for ported skills: keep `SKILL.md` and its `references/` or `rules/` files; drop DevDigest paths from skill text. The `onion-architecture` `evals/` folder is **not** shipped in 1.0.0 **[my decision]**: its fixtures are a mirror of the source product and would need neutral rewrites; keep a `SOURCES.md` where the original has one, so provenance stays visible.
 
 ### 3.2 `research-tools`
 
@@ -57,7 +64,9 @@ Generalisation: the repository-research order (`specs/` → `docs/` → `INSIGHT
 
 ### 3.3 `architecture-review`
 
-Agent `architecture-reviewer`: read-only reviewer that returns findings with evidence. Its architecture rules come from `engineering-paved-path:onion-architecture` and `engineering-paved-path:frontend-ui-architecture`, loaded through the `Skill` tool. The agent works without them but says so in its report.
+Depends on `engineering-paved-path` (`^1.0.0`).
+
+Agent `architecture-reviewer`: read-only reviewer that returns findings with evidence. Its architecture rules come from `engineering-paved-path:onion-architecture` and `engineering-paved-path:frontend-ui-architecture`, loaded through the `Skill` tool. The agent works without them but says so in its report. The dependency guarantees they are installed.
 
 ### 3.4 `sdd-engineering`
 
@@ -78,7 +87,7 @@ Skills:
 | `run-plan` | `/sdd-engineering:run-plan`: implementer → architecture-reviewer + plan-verifier → capped fix loop → AC report. |
 | `workflow-retro` | `/sdd-engineering:workflow-retro`: manual retrospective of a multi-agent run. `--deep` delegates transcript reading to `researcher`. |
 
-Also shipped: `evals/` for the agents and skills, `README.md`, `CHANGELOG.md`.
+Also shipped: `skill-routing.md` (change type → `engineering-paved-path:<skill>`), `README.md`, `CHANGELOG.md`. The source `evals/` harness (a product-specific runner with its own proxy and fixtures) is **not** shipped in 1.0.0 **[my decision]**; a neutral eval suite can follow in a minor release (`plugin.json` supports `experimental.evals`).
 
 Chain:
 
@@ -136,12 +145,15 @@ Owner is `free3et` (marketplace owner, slide 5). A commit or tag of the marketpl
 
 ## 7. Releases and versioning
 
+Work happens on branch `feat/sdd-engineering-plugins` of `free3et/dev-digest-ai-marketplace` and is pushed there; `main` receives it through a pull request.
+
 Verified in the Claude Code docs: a dependency range resolves against git tags named **`<plugin>--v<version>`** (double dash). The repository currently uses `<plugin>-v<version>` in `scripts/lib.mjs`, `scripts/release.mjs`, `scripts/rollback.mjs` and `docs/RELEASES.md`. These must change before the first release, or `^1.0.0` cannot resolve to a tag.
 
 Changes:
 1. `tagFor` returns `<plugin>--v<version>`; `releasedVersions` and the rollback prefix parsing use the same prefix.
 2. `docs/RELEASES.md` and `docs/PLUGIN-GUIDELINES.md` examples are updated.
-3. Because the plugins use relative-path sources, the tags live in this marketplace repository. All four plugins are tagged `--v1.0.0` in the first release, so that the `^1.0.0` constraints resolve.
+3. `scripts/lib.mjs` also validates plugin `dependencies` (known names, valid ranges, no cycles).
+4. Because the plugins use relative-path sources, the tags live in this marketplace repository. All four plugins are tagged `--v1.0.0` in the first release, so that the `^1.0.0` constraints resolve.
 
 Versions are recorded in three places, each with one purpose:
 - `plugin.json`: the authoritative version.
@@ -158,8 +170,8 @@ Required sections, in order: what SDD is and why; install (one command, dependen
 plugins/
 ├── engineering-paved-path/   .claude-plugin/plugin.json  skills/<10 skills>/  README.md  CHANGELOG.md
 ├── research-tools/           .claude-plugin/plugin.json  agents/researcher.md   README.md  CHANGELOG.md
-├── architecture-review/      .claude-plugin/plugin.json  agents/architecture-reviewer.md  README.md  CHANGELOG.md
-└── sdd-engineering/          .claude-plugin/plugin.json  agents/ (4)  skills/ (3)  hooks/  evals/  README.md  CHANGELOG.md
+├── architecture-review/      .claude-plugin/plugin.json  agents/architecture-reviewer.md  README.md  CHANGELOG.md   (depends on engineering-paved-path)
+└── sdd-engineering/          .claude-plugin/plugin.json  agents/ (4)  skills/ (3)  hooks/  skill-routing.md  README.md  CHANGELOG.md
 ```
 
 ## 10. Acceptance criteria
@@ -171,6 +183,7 @@ plugins/
 - AC-5: `researcher` and `architecture-reviewer` have no `Write` or `Edit` in `tools`.
 - AC-6: `release.mjs` creates tags in the `<plugin>--v<version>` form, and a dry run of `release.mjs` plus `rollback.mjs` on a test plugin still works.
 - AC-7: The README covers every section in section 8.
+- AC-9: `validate-marketplace.mjs` rejects an unknown dependency name, an invalid version range and a dependency cycle.
 - AC-8: A manual smoke run of the chain on a small sample feature completes: spec → plan → implementation → verification report.
 
 ## 11. Open items to settle during planning

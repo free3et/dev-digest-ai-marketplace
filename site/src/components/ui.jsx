@@ -1,32 +1,33 @@
 import { useState } from 'react';
 import { copyText } from '../lib/copy.js';
 import { useApp } from '../lib/context.jsx';
-import { HEALTH_CODE, HEALTH_LABEL, TYPE_LABEL, addCmd, ago, fileOf, installCmd } from '../lib/format.js';
+import { addCmd, ago, fileOf, installCmd } from '../lib/format.js';
+import { healthLabel, t, typeLabel } from '../lib/i18n.jsx';
 import { buildHash } from '../lib/route.js';
 import { highlight } from '../lib/search.js';
 
 export const Link = ({ to, children, ...rest }) => <a href={buildHash(to)} {...rest}>{children}</a>;
 
-export const TypeBadge = ({ type }) => <span className="tb" style={{ '--c': `var(--t-${type})` }}>{TYPE_LABEL[type]}</span>;
-export const HealthPill = ({ plugin }) => <span className={`pill ${plugin.health}`}>{HEALTH_LABEL[plugin.health]}</span>;
-export const FreshPill = ({ days }) => (days <= 7 ? <span className="pill new">new</span> : days <= 14 ? <span className="pill new">updated</span> : null);
+export const TypeBadge = ({ type }) => <span className="tb" style={{ '--c': `var(--t-${type})` }}>{typeLabel(type)}</span>;
+export const HealthPill = ({ plugin }) => <span className={`pill ${plugin.health}`}>{healthLabel(plugin.health)}</span>;
+export const FreshPill = ({ days }) => (days <= 7 ? <span className="pill new">{t('fresh.new')}</span> : days <= 14 ? <span className="pill new">{t('fresh.updated')}</span> : null);
 
 export function Highlight({ text, toks = [] }) {
   return highlight(text, toks).map((p, i) => (p.hit ? <mark key={i}>{p.text}</mark> : p.text));
 }
 
-export function CopyButton({ text, className = 'cp', label = 'Copy', children }) {
+export function CopyButton({ text, className = 'cp', label = t('common.copy'), children }) {
   const { showToast } = useApp();
   const [done, setDone] = useState(false);
   const click = async (e) => {
     e.stopPropagation();
     if (await copyText(text)) {
-      showToast('Copied');
+      showToast(t('common.copied'));
       setDone(true);
       setTimeout(() => setDone(false), 1200);
-    } else showToast('Select the text and copy it manually');
+    } else showToast(t('common.copyFailed'));
   };
-  return <button type="button" className={`${className}${done ? ' done' : ''}`} onClick={click}>{done ? 'Done' : children || label}</button>;
+  return <button type="button" className={`${className}${done ? ' done' : ''}`} onClick={click}>{done ? t('common.done') : children || label}</button>;
 }
 
 export const CodeBlock = ({ text }) => <div className="code">{text}<CopyButton text={text} /></div>;
@@ -38,7 +39,7 @@ export function Empty({ title, children, style }) {
 export function Crumbs({ items }) {
   return (
     <div className="crumbs">
-      <Link to={{ name: 'catalog' }}>Catalog</Link>
+      <Link to={{ name: 'catalog' }}>{t('nav.catalog')}</Link>
       {items.map(([label, to]) => (
         <span key={label} style={{ display: 'contents' }}>
           <span>/</span>
@@ -73,9 +74,9 @@ export function SecurityPanel({ list }) {
   const tools = list.filter((a) => a.tools);
   return (
     <section className="panel">
-      <h3>What runs</h3>
+      <h3>{t('security.title')}</h3>
       <p style={{ margin: '0 0 8px' }}>
-        {risky ? <span className="pill warn">runs commands on your machine</span> : <span className="pill ok">text instructions only</span>}
+        {risky ? <span className="pill warn">{t('security.risky')}</span> : <span className="pill ok">{t('security.safe')}</span>}
       </p>
       {runs.map((a) => (
         <div className="sec-row" key={a.id}>
@@ -83,15 +84,15 @@ export function SecurityPanel({ list }) {
           <div><div className="ln">{a.name}</div><code>{a.event ? `${a.event} · ${a.matcher} → ` : ''}{a.run}</code></div>
         </div>
       ))}
-      {tools.length > 0 && <div className="fg-t" style={{ marginTop: 12 }}>Allowed tools</div>}
+      {tools.length > 0 && <div className="fg-t" style={{ marginTop: 12 }}>{t('security.allowedTools')}</div>}
       {tools.map((a) => (
         <div className="sec-row" key={a.id}>
           <TypeBadge type={a.type} />
           <div><div className="ln">{a.name}</div><code>{a.tools}</code></div>
         </div>
       ))}
-      {!runs.length && !tools.length && <p className="muted" style={{ margin: 0 }}>No hooks, MCP servers or commands.</p>}
-      <p className="note">Automatic static analysis. This is not a full security audit.</p>
+      {!runs.length && !tools.length && <p className="muted" style={{ margin: 0 }}>{t('security.none')}</p>}
+      <p className="note">{t('security.note')}</p>
     </section>
   );
 }
@@ -101,10 +102,10 @@ export function InstallPanel({ plugin }) {
   const inKit = prefs.cart.has(plugin);
   return (
     <section className="panel">
-      <h3>Install</h3>
+      <h3>{t('install.title')}</h3>
       <div className="codes"><CodeBlock text={addCmd(catalog)} /><CodeBlock text={installCmd(catalog, plugin)} /></div>
       <p style={{ margin: '12px 0 0' }}>
-        <button type="button" className="btn sm" aria-pressed={inKit} onClick={() => toggleCart(plugin)}>{inKit ? 'In kit ✓' : '+ Add to kit'}</button>
+        <button type="button" className="btn sm" aria-pressed={inKit} onClick={() => toggleCart(plugin)}>{inKit ? t('common.inKit') : t('common.addToKit')}</button>
       </p>
     </section>
   );
@@ -125,12 +126,12 @@ export function Card({ a, toks = [] }) {
       <h3><Highlight text={a.name} toks={toks} /></h3>
       <p><Highlight text={a.desc || ''} toks={toks} /></p>
       <div className="pl"><span>{a.plugin}</span><span>v{p.ver}</span><span>· {ago(a.days)}</span></div>
-      <div className="tags">{a.tags.map((t) => <span className="tag" key={t}>{t}</span>)}</div>
+      <div className="tags">{a.tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>
       <div className="card-f">
-        <CopyButton className="btn ghost sm" text={installCmd(catalog, a.plugin)}>Copy install command</CopyButton>
-        <button type="button" className="btn ghost sm" aria-pressed={inKit} onClick={(e) => { e.stopPropagation(); toggleCart(a.plugin); }}>{inKit ? 'In kit ✓' : '+ Add to kit'}</button>
+        <CopyButton className="btn ghost sm" text={installCmd(catalog, a.plugin)}>{t('card.copyInstall')}</CopyButton>
+        <button type="button" className="btn ghost sm" aria-pressed={inKit} onClick={(e) => { e.stopPropagation(); toggleCart(a.plugin); }}>{inKit ? t('common.inKit') : t('common.addToKit')}</button>
         <span className="sp" />
-        <button type="button" className="star" aria-pressed={saved} aria-label="Save" onClick={(e) => { e.stopPropagation(); toggleSaved(a.id); }}>{saved ? '★' : '☆'}</button>
+        <button type="button" className="star" aria-pressed={saved} aria-label={t('card.save')} onClick={(e) => { e.stopPropagation(); toggleSaved(a.id); }}>{saved ? '★' : '☆'}</button>
       </div>
     </article>
   );

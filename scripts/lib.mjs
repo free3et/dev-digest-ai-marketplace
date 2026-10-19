@@ -68,12 +68,12 @@ export function tagExists(tag) {
 }
 
 export function tagFor(plugin, version) {
-  return `${plugin}-v${version}`;
+  return `${plugin}--v${version}`;
 }
 
-/** Versions released for a plugin, read from tags named `<plugin>-v<semver>`. */
+/** Versions released for a plugin, read from tags named `<plugin>--v<semver>`. */
 export function releasedVersions(plugin) {
-  const prefix = `${plugin}-v`;
+  const prefix = `${plugin}--v`;
   return git('tag', '--list', `${prefix}*`)
     .split('\n')
     .filter(Boolean)
@@ -154,8 +154,8 @@ const SECRET_PATTERNS = [
   [/\bxox[abprs]-[A-Za-z0-9-]{10,}/, 'Slack token'],
 ];
 
-const TEXT_EXTENSIONS = new Set(['.md', '.json', '.mjs', '.js', '.yml', '.yaml', '.sh', '.txt', '.toml']);
-const SKIP_DIRS = new Set(['.git', 'node_modules']);
+const TEXT_EXTENSIONS = new Set(['.md', '.json', '.mjs', '.cjs', '.js', '.jsx', '.ts', '.tsx', '.css', '.html', '.yml', '.yaml', '.sh', '.py', '.txt', '.toml']);
+const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist']);
 const MAX_SCAN_BYTES = 1024 * 1024;
 
 function* walk(dir) {
@@ -256,15 +256,10 @@ function checkExternalSource(entry, err, warn) {
   if (src.source === 'archive' && !/^[0-9a-f]{64}$/.test(src.sha256 ?? '')) err(`${where}: archive sources need a 64-character "sha256"`);
 }
 
-// The only place Cyrillic is allowed: Ukrainian UI translation files, for example
-// src/locales/uk.json or i18n/uk.yml. English is the source language; Ukrainian is additional.
-const UKRAINIAN_LOCALE = /(^|\/)(locales?|i18n)\/uk([._-][^/]*)?$/;
-
 function checkRepoText(err) {
   const cyrillic = new RegExp("[\\u0400-\\u04FF]");
   const pluginsRoot = join(ROOT, 'plugins');
   for (const file of walk(ROOT)) {
-    if (UKRAINIAN_LOCALE.test(relative(ROOT, file).split('\\').join('/'))) continue;
     const ext = extensionOf(file);
     const isText = TEXT_EXTENSIONS.has(ext) || ext === '' || file.startsWith(pluginsRoot);
     if (!isText || statSync(file).size > MAX_SCAN_BYTES) continue;
@@ -277,6 +272,60 @@ function checkRepoText(err) {
 }
 
 /** Structural lint of the marketplace. Returns { errors, warnings }. */
+const RANGE_RE = /^(\^|~|>=|<=|>|<|=)?\d+(\.\d+){0,2}(-[0-9A-Za-z.-]+)?$/;
+
+/** Plugin `dependencies` in plugin.json: known names, valid ranges, no cycles. */
+function checkDependencies(entries, err) {
+  const known = new Set(entries.filter((e) => e && typeof e.name === 'string').map((e) => e.name));
+  const graph = new Map();
+  for (const entry of entries) {
+    if (!entry || typeof entry.source !== 'string') continue;
+    const manifestPath = resolve(ROOT, entry.source, '.claude-plugin', 'plugin.json');
+    if (!existsSync(manifestPath)) continue;
+    let manifest;
+    try {
+      manifest = readJson(manifestPath);
+    } catch {
+      continue; // reported by checkPluginDir
+    }
+    if (manifest.dependencies === undefined) continue;
+    if (!Array.isArray(manifest.dependencies)) {
+      err(`plugin "${entry.name}": "dependencies" must be an array`);
+      continue;
+    }
+    const edges = [];
+    for (const dep of manifest.dependencies) {
+      const name = typeof dep === 'string' ? dep : dep && dep.name;
+      const marketplace = typeof dep === 'string' ? (dep.split('@')[1] ?? null) : dep && dep.marketplace;
+      const bare = typeof name === 'string' ? name.split('@')[0] : null;
+      if (!bare) {
+        err(`plugin "${entry.name}": dependency entry needs a "name"`);
+        continue;
+      }
+      if (dep && typeof dep === 'object' && dep.version !== undefined && !RANGE_RE.test(dep.version)) {
+        err(`plugin "${entry.name}": dependency "${bare}" has an unsupported version range "${dep.version}"`);
+      }
+      if (marketplace) continue; // resolved in another marketplace
+      if (bare === entry.name) err(`plugin "${entry.name}": depends on itself`);
+      else if (!known.has(bare)) err(`plugin "${entry.name}": dependency "${bare}" is not in this marketplace`);
+      else edges.push(bare);
+    }
+    graph.set(entry.name, edges);
+  }
+  const state = new Map();
+  const visit = (node, trail) => {
+    if (state.get(node) === 'done') return;
+    if (state.get(node) === 'active') {
+      err(`dependency cycle: ${[...trail, node].join(' -> ')}`);
+      return;
+    }
+    state.set(node, 'active');
+    for (const next of graph.get(node) ?? []) visit(next, [...trail, node]);
+    state.set(node, 'done');
+  };
+  for (const node of graph.keys()) visit(node, []);
+}
+
 export function validateMarketplace() {
   const errors = [];
   const warnings = [];
@@ -324,6 +373,7 @@ export function validateMarketplace() {
       }
     }
   }
+  if (Array.isArray(mp.plugins)) checkDependencies(mp.plugins, err);
   checkRepoText(err);
   return { errors, warnings };
 }

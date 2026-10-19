@@ -1,0 +1,9 @@
+{
+  "name": "engineering-paved-path",
+  "version": "1.0.0",
+  "description": "Reusable engineering skills: React, Next.js, Fastify, layered architecture, testing, security, Zod and TypeScript.",
+  "author": {
+    "name": "free3et"
+  },
+  "license": "MIT"
+}

@@ -1,9 +1,16 @@
 name: Catalog site
 
+# Builds and publishes the catalog UI (site/). Independent from "Validate marketplace",
+# which only lints the plugin files. Each job below shows up as its own check on a pull request.
+#
+# Pull requests always run the checks (no path filter): "Site tests" and "Build site" are required
+# status checks, and a required check that never starts would block every PR that touches other files.
+# Pushes to main only redeploy when something the site is built from has changed.
+
 on:
   push:
     branches: [main]
-    paths: &paths
+    paths:
       - 'site/**'
       - 'plugins/**'
       - '.claude-plugin/**'
@@ -13,7 +20,6 @@ on:
       - 'package-lock.json'
       - '.github/workflows/pages.yml'
   pull_request:
-    paths: *paths
   workflow_dispatch:
 
 permissions:
@@ -24,7 +30,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test:
+    name: Site tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
   build:
+    name: Build site
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,16 +54,24 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test
       - name: Build the site (indexes the repository into catalog.json)
         run: npm run build
+      - name: Summarize the catalog
+        run: |
+          {
+            echo '### Catalog index'
+            echo '```'
+            node scripts/catalog.mjs
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist
 
   deploy:
+    name: Deploy to GitHub Pages
     if: github.ref == 'refs/heads/main'
-    needs: build
+    needs: [test, build]
     runs-on: ubuntu-latest
     permissions:
       pages: write

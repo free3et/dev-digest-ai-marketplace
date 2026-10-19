@@ -11,7 +11,7 @@ const toDays = (x) => (typeof x === 'number' ? x : daysSince(x));
 
 export function normalize(raw) {
   const plugins = (raw.plugins || []).map((p) => ({
-    tags: [], kw: [], cat: 'Other', health: 'ok', healthCodes: [], ...p,
+    tags: [], kw: [], deps: [], cat: 'Other', health: 'ok', healthCodes: [], ...p,
     days: toDays(p.updated ?? 0),
     log: (p.log || []).map((l) => ({ ...l, notes: l.notes || [], days: toDays(l.date ?? 0) })),
   }));

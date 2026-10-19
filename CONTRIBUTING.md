@@ -4,7 +4,7 @@ Thanks for helping. This repository is a plugin marketplace, so a mistake in the
 
 ## Ground rules
 
-- **English only**, with one exception. Documentation, plugin descriptions, code comments, commit messages and PR text must be in English. The validator rejects Cyrillic characters in repository files. The only allowed exception is the Ukrainian translation of the catalog UI: files named `uk*` inside a `locales/` or `i18n/` directory (for example `src/locales/uk.json`). English is the source language there; Ukrainian is additional.
+- **English only**, with no exceptions. Documentation, plugin descriptions, READMEs, code comments, UI text, commit messages and PR text must be in English. The validator rejects Cyrillic characters in every repository text file (Markdown, JSON, YAML, scripts, JS/JSX/TS, CSS, HTML).
 - **Enable the git hook once per clone:** `npm run setup` (or `git config core.hooksPath .githooks`). The `pre-push` hook runs the validator and reminds you about branch protection.
 - **Never commit secrets.** See [docs/SECURITY.md](docs/SECURITY.md).
 - **Do not bump versions by hand.** Releases are cut with `scripts/release.mjs` ([docs/RELEASES.md](docs/RELEASES.md)).
