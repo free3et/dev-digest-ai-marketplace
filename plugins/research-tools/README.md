@@ -13,6 +13,16 @@ claude plugin install research-tools@dev-digest-ai-marketplace
 
 The agent's namespaced name is `research-tools:researcher`. Ask Claude to use it ("use the researcher agent to find out where retries are configured") or start it through the Agent tool with `subagent_type: "research-tools:researcher"`.
 
+## Examples of good questions
+
+| Question | Scope |
+|---|---|
+| "Where are order retries configured, and what was decided about the retry limit?" | repository |
+| "What changed in the HTTP client's timeout handling between v4 and v5? Cite the release notes." | external |
+| "Does our queue worker follow the retry advice in the library docs? List the differences." | both |
+
+Concrete questions with a scope get the best reports. "Look at authorization" is too vague and triggers clarifying questions.
+
 ## Inputs
 
 A concrete question in the prompt. Helpful extras: whether the answer should come from the repository, external sources, or both; paths to look at first; the desired result (fact, comparison, recommendation, overview).

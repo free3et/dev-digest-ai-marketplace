@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- README section with examples of good research questions.
+
 ## [1.0.0] - 2026-10-19
 
 ### Added
