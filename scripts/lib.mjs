@@ -154,8 +154,8 @@ const SECRET_PATTERNS = [
   [/\bxox[abprs]-[A-Za-z0-9-]{10,}/, 'Slack token'],
 ];
 
-const TEXT_EXTENSIONS = new Set(['.md', '.json', '.mjs', '.js', '.yml', '.yaml', '.sh', '.txt', '.toml']);
-const SKIP_DIRS = new Set(['.git', 'node_modules']);
+const TEXT_EXTENSIONS = new Set(['.md', '.json', '.mjs', '.cjs', '.js', '.jsx', '.ts', '.tsx', '.css', '.html', '.yml', '.yaml', '.sh', '.py', '.txt', '.toml']);
+const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist']);
 const MAX_SCAN_BYTES = 1024 * 1024;
 
 function* walk(dir) {
@@ -256,15 +256,10 @@ function checkExternalSource(entry, err, warn) {
   if (src.source === 'archive' && !/^[0-9a-f]{64}$/.test(src.sha256 ?? '')) err(`${where}: archive sources need a 64-character "sha256"`);
 }
 
-// The only place Cyrillic is allowed: Ukrainian UI translation files, for example
-// src/locales/uk.json or i18n/uk.yml. English is the source language; Ukrainian is additional.
-const UKRAINIAN_LOCALE = /(^|\/)(locales?|i18n)\/uk([._-][^/]*)?$/;
-
 function checkRepoText(err) {
   const cyrillic = new RegExp("[\\u0400-\\u04FF]");
   const pluginsRoot = join(ROOT, 'plugins');
   for (const file of walk(ROOT)) {
-    if (UKRAINIAN_LOCALE.test(relative(ROOT, file).split('\\').join('/'))) continue;
     const ext = extensionOf(file);
     const isText = TEXT_EXTENSIONS.has(ext) || ext === '' || file.startsWith(pluginsRoot);
     if (!isText || statSync(file).size > MAX_SCAN_BYTES) continue;
