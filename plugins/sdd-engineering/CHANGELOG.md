@@ -4,6 +4,9 @@ All notable changes to this plugin are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+### Added
+- `COMPATIBILITY.md`: verified and declared Claude Code versions, relied-on features, required tools, tested dependency combinations.
+
 ## [1.0.0] - 2026-10-19
 
 ### Added
