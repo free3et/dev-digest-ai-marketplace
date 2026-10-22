@@ -1,4 +1,5 @@
 ---
 type: regex
-pattern: '\bFAIL\b'
+pattern: '[Vv]erdict\W{1,8}FAIL|\*\*FAIL'
+target: trace
 ---

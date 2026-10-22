@@ -1,4 +1,5 @@
 ---
 type: regex
-pattern: 'import type \{ FastifyReply \} from .fastify.'
+pattern: '`[^`]*import type \{ FastifyReply \}[^`]*`'
+target: trace
 ---

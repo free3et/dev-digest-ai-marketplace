@@ -1,4 +1,5 @@
 ---
 type: regex
-pattern: 'new PgOrderRepository\(\)'
+pattern: '`[^`]*new PgOrderRepository\(\)[^`]*`'
+target: trace
 ---
