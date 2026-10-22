@@ -10,6 +10,9 @@ All notable changes to this plugin are documented here. The format follows [Keep
 - `docs/COST-BASELINE.md` (repository root): cost baseline and a no-effect experiment.
 - `COMPATIBILITY.md`: verified and declared Claude Code versions, relied-on features, required tools, tested dependency combinations.
 
+### Changed
+- `implementation-planner` and `spec-creator` refer to `sdd-spec` instead of repeating its spec-status and traceability rules. Measured effect on cost: none (see `docs/COST-BASELINE.md`).
+
 ## [1.0.0] - 2026-10-19
 
 ### Added
