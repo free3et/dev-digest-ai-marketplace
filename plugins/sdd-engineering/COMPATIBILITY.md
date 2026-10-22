@@ -18,7 +18,7 @@ Raise the minimum, and note why, whenever the plugin starts to use a newer Claud
 |---|---|---|
 | Plugin dependencies with version ranges | `plugin.json` | Resolved from git tags named `<plugin>--v<version>` |
 | Namespaced components | agents and skills | `engineering-paved-path:<skill>`, `research-tools:researcher`, `architecture-review:architecture-reviewer` |
-| Plugin-wide hooks | `hooks/hooks.json` | The guard needs `agent_type` in the hook input to tell `spec-creator` and `plan-verifier` from other callers. The docs describe the field; it has **not** been observed in a live subagent session. Without it the guard does nothing |
+| Plugin-wide hooks | `hooks/hooks.json` | The guard needs `agent_type` in the hook input to tell `spec-creator` and `plan-verifier` from other callers. The docs describe the field; it was **not** observed directly. Indirect evidence (2026-10-22, 1.1.0 installed at user scope in another project): during a live `spec-creator` pass 2 the guard blocked Bash searches such as `rg "dark-mode"` and `rg "dark mode\|theme"`, as reported by the agent. That suggests the field arrives, but the hook input was not logged. Known problem: those searches are read-only and should not be blocked (false positive, not yet investigated). Without the field the guard does nothing |
 | `${CLAUDE_PLUGIN_ROOT}` | hook command, agent prompts | Plugin-level files such as `skill-routing.md` |
 | Agent frontmatter | agents | Only fields supported for plugin agents (`name`, `description`, `model`, `tools`, `maxTurns`, `skills`); `hooks` and `permissionMode` are ignored there and are not used |
 
