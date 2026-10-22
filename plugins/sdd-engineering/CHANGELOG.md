@@ -4,8 +4,16 @@ All notable changes to this plugin are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-22
+
 ### Added
+- `spec-creator` no longer finishes a spec while a goal (`G-n`) or an NFR has no acceptance criterion: the spec report carries one line, `Mandatory coverage: complete` or `incomplete — <ids>`; `sdd-spec` §11 final self-check has an 11th item for it.
+- Behavior evals in `evals/` (6 cases).
+- `docs/COST-BASELINE.md` (repository root): cost baseline and a no-effect experiment.
 - `COMPATIBILITY.md`: verified and declared Claude Code versions, relied-on features, required tools, tested dependency combinations.
+
+### Changed
+- `implementation-planner` and `spec-creator` refer to `sdd-spec` instead of repeating its spec-status and traceability rules. Measured effect on cost: none (see `docs/COST-BASELINE.md`).
 
 ## [1.0.0] - 2026-10-19
 
