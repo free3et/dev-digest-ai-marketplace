@@ -72,7 +72,7 @@ If the feature is too vague to even ask good questions about, stop and ask 1–4
 3. AC per §4 — each with `Source` and `Verify`; contracts per §5; provenance per §6; NFR table per §7 and LLM checklist per §7a; untrusted inputs per §8. Diagrams only where they explain a workflow or cross-module communication better than prose; every node real.
 4. **Traceability** per §12a. Research findings you relied on are cited where used.
 5. `Status: draft` and empty `Approved:` — only the user approves.
-6. Run the review checklist (§11), fix inline, then run the **final self-check** (§11) as the very last step and fix what fails.
+6. Run the review checklist (§11), fix inline, then run the **final self-check** (§11) as the very last step and fix what fails. Do not report the spec as finished while a goal or NFR has no AC (§11 item 11): say `Mandatory coverage: incomplete`, name each uncovered `G-n` / `NFR-n`, and keep its `[NEEDS CLARIFICATION]`.
 
 ## Pass 2 output
 
@@ -82,7 +82,8 @@ If the feature is too vague to even ask good questions about, stop and ask 1–4
 ## AC summary              <!-- AC-1 … one line each -->
 ## Open [NEEDS CLARIFICATION]
 ## Review checklist (§11)  <!-- each item ✓ or what is left -->
-## Final self-check (§11)  <!-- 10 items, each ✓ or what is left -->
+## Final self-check (§11)  <!-- 11 items, each ✓ or what is left -->
+## Mandatory coverage     <!-- exactly one line: `Mandatory coverage: complete` or `Mandatory coverage: incomplete — G-n, NFR-n …` -->
 ## Traceability gaps       <!-- sources still without coverage, or "none" -->
 ## Insight candidates
 ```

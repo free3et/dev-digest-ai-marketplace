@@ -196,7 +196,7 @@ For every screen / flow in the design sources:
 7. Size threshold respected (§1).
 8. Every `[new: LLM call]` answers §7a; every untrusted source is in §8.
 
-**Final self-check** — mechanical, run by `spec-creator` as the very last step; report each as ✓ or what is left:
+**Final self-check** — mechanical, run by `spec-creator` as the very last step; report each as ✓ or what is left (11 items):
 
 1. File is in the right folder (§2); file name and `Spec ID` match; the name is not taken by another spec.
 2. Header line exactly `# Spec: … | Spec ID: … | Status: draft`; `Approved:` empty.
@@ -208,6 +208,7 @@ For every screen / flow in the design sources:
 8. No file paths, function names or task steps outside Contracts, Design references and Inputs and provenance.
 9. Every Mermaid node is a real or specified module, endpoint or contract.
 10. Every claim about current behavior cites a source (`path:line`, spec, project docs entry, or research finding).
+11. **Mandatory coverage:** every goal `G-n` and every `NFR-n` is the `Source` of at least one AC, or the NFR has its own `Verify`. A goal that cannot get an AC yet (nobody decided the number, the behavior or the owner) is not silently turned into a non-goal: the spec is reported as `incomplete` and the goal is named.
 
 ## 12. Traceability
 
