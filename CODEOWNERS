@@ -1,5 +1,9 @@
 # Catch-all: the maintainer reviews every change.
-*                          @free3et
+*                                    @free3et
 
-# Per-plugin owners go below, one line per plugin, for example:
-# /plugins/my-plugin/      @free3et @another-maintainer
+# Per-plugin owners. The last matching line wins, so these must stay below the catch-all.
+# To add a co-owner, list them after @free3et on that plugin's line.
+/plugins/engineering-paved-path/     @free3et
+/plugins/research-tools/             @free3et
+/plugins/architecture-review/        @free3et
+/plugins/sdd-engineering/            @free3et
