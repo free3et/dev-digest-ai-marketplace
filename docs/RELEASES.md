@@ -105,6 +105,28 @@ What the script does:
 
 After a rollback, fix the problem on a branch and release a new version as usual.
 
+### Rollback rehearsal (user side, recorded 2026-10-22)
+
+A stable channel is the same marketplace added with a tag as its ref. Rehearsed on one machine with `sdd-engineering` 1.1.0 installed at user scope; Claude Code 2.1.303.
+
+```bash
+claude plugin marketplace list
+claude plugin uninstall sdd-engineering@dev-digest-ai-marketplace --keep-data
+claude plugin marketplace remove dev-digest-ai-marketplace
+claude plugin marketplace add free3et/dev-digest-ai-marketplace#sdd-engineering--v1.0.0
+claude plugin install sdd-engineering@dev-digest-ai-marketplace
+claude plugin list | grep -A3 sdd-engineering
+```
+
+Observed:
+
+- The catalog name is the same in both channels, so the current channel has to be removed before the stable one is added.
+- `marketplace remove` also removed the three dependencies (`engineering-paved-path`, `research-tools`, `architecture-review`) with their data. They came back with `plugin install`, pulled in as dependencies. `claude plugin prune` was not needed.
+- The marketplace was cloned over SSH, and the entry appeared in the user settings.
+- The install resolved `sdd-engineering` `1.0.0`, scope user, enabled; `/reload-plugins` reported 7 plugins.
+- No plugin in this repository uses a persistent data directory (`CLAUDE_PLUGIN_DATA` is not referenced), so `--keep-data` protected nothing here. It is kept in the sequence as a safe default.
+- Not yet recorded: the smoke check on 1.0.0 (a `spec-creator` pass 2 with an undecided goal should print no `Mandatory coverage` line) and the way back to the latest channel (`marketplace remove`, then `marketplace add free3et/dev-digest-ai-marketplace`, `plugin install`, `plugin list`).
+
 ## Emergency options
 
 | Situation | Action |
