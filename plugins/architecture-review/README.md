@@ -64,6 +64,10 @@ The `sdd-engineering` plugin depends on this plugin (its verification flow uses 
 
 Claude Code with plugin support.
 
+## Testing
+
+The agent has behavior evals in [evals/](evals/README.md), run with `claude plugin eval` (Claude Code 2.1.269 or later). They cover real violations, rule citation, and negative cases (a benign change, out-of-scope remarks, an unrelated request).
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

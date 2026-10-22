@@ -109,11 +109,13 @@ The agents know nothing about your project's layout, so they take explicit input
 
 ## Compatibility
 
+See [COMPATIBILITY.md](COMPATIBILITY.md) for the Claude Code versions (verified and declared), the features the plugin relies on, required tools and the tested dependency combinations.
+
 | sdd-engineering | engineering-paved-path | research-tools | architecture-review |
 |---|---|---|---|
 | 1.0.0 | ^1.0.0 | ^1.0.0 | ^1.0.0 |
 
-Versions follow SemVer; see [CHANGELOG.md](CHANGELOG.md). A release of a dependency that changes its agent or skill names is a major version, so the `^1.0.0` ranges keep the chain working.
+Versions follow SemVer; see [CHANGELOG.md](CHANGELOG.md).
 
 ## Not included
 
