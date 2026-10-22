@@ -49,11 +49,34 @@ The change passes only if all of these hold:
 
 If 1 holds and 2 does not, the result is "no measurable difference", and is recorded as such.
 
-## Experiment (stage B, not run yet)
+## Experiment: remove duplicated instructions
 
-One change: remove duplicated instructions between the agent prompts and the preloaded `sdd-spec` skill. No change of model, routing, tools or `maxTurns`. Record the result below.
+One change, no change of model, routing, tools or `maxTurns`: four phrases in `implementation-planner.md` and `spec-creator.md` that restated `sdd-spec` (spec status, traceability rules, the AC `Source`/`Verify` check) now point to the section instead. About 150 words removed from roughly 3,500 per agent prompt.
 
-| | Cost | Latency | Cache write | Pass rate | Verdict |
-|---|---|---|---|---|---|
-| Baseline | | | | | |
-| After | | | | | |
+Same cases, 3 runs each, Claude Code 2.1.303, runs on 2026-10-22 after the baseline. Baseline column is the 3-run series with the same case wording; the 8-run series is shown where it differs.
+
+| Case | Cost, before (median) | Cost, after (median) | Range before | Range after | Latency before / after | Cache write after | Pass rate |
+|---|---|---|---|---|---|---|---|
+| `spec-creator-pass1` | $0.31 (8-run: $0.30) | $0.30 | 0.27-0.34 | 0.28-0.33 | 71 s / 72 s | 22.7k (before 23.4k) | 3 of 3 before and after |
+| `spec-creator-pass2` | $0.40 (8-run: $0.41) | $0.43 | 0.37-0.44 | 0.36-0.44 | 98 s / 112 s | 29.5k (before 28.2k) | 3 of 3 before and after |
+| `implementation-planner` | $0.52 (8-run, older spec: $0.41) | $0.44 | 0.38-0.60 | 0.38-0.45 | 127 s / 103 s | 35.0k (before 28.7k, older spec) | 3 of 3 before and after |
+
+### Cost per successful workflow
+
+A workflow here is the chain pass 1, pass 2, plan. A run counts as successful when the case scores 1.00. Cost per successful workflow is the sum of the per-case median costs divided by the success rate of the final-wording cases (100% before and after).
+
+| | Before | After |
+|---|---|---|
+| Sum of medians | $1.23 | $1.17 |
+| Success rate | 100% (3 of 3 each) | 100% (3 of 3 each) |
+| **Cost per successful workflow** | **$1.23** | **$1.17** |
+
+Using the 8-run medians as "before" instead gives $1.12, which is below "after". The direction depends on which baseline is chosen.
+
+### Verdict
+
+**No measurable difference.** The quality gate (rule 1) holds: every case is 1.00 in 3 of 3 runs. The cost gate (rule 2) fails: the change in the sum of medians is about 5% and it flips sign with the 8-run baseline; every per-case difference lies inside the run-to-run spread (10-25%). The planner shows the largest drop (-17%), but its ranges overlap and the 8-run baseline for it ($0.41) is already lower than the "after" value.
+
+Why this is unsurprising: uncached input is under 15 tokens per run, and cost is driven by about 6-12k output tokens and 23-35k cache-write tokens on `opus`. Removing 150 words changes cache writes by a few hundred tokens. A real saving would need shorter agent output or a smaller preloaded context, which changes behavior and is a separate experiment.
+
+The wording change is kept: it is harmless and removes duplicated rules, but it is not a cost optimisation. 3 runs per case cannot detect a drop smaller than about 15%.

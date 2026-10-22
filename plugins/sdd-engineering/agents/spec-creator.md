@@ -70,7 +70,7 @@ If the feature is too vague to even ask good questions about, stop and ask 1–4
 1. Name and ID per §2 (today's date). Fill the template (§3) in English.
 2. Every answer from the prompt → applied in the body **and** logged in Clarifications with today's date. Unanswered questions → `[NEEDS CLARIFICATION: …]` inline and in Open questions. Rejected UX proposals do not appear; accepted ones become ordinary goals and AC.
 3. AC per §4 — each with `Source` and `Verify`; contracts per §5; provenance per §6; NFR table per §7 and LLM checklist per §7a; untrusted inputs per §8. Diagrams only where they explain a workflow or cross-module communication better than prose; every node real.
-4. **Traceability** per §12a: every goal, user story, edge case, pass-1 design gap and accepted UX proposal → AC, non-goal or open question. Research findings you relied on are cited where used.
+4. **Traceability** per §12a. Research findings you relied on are cited where used.
 5. `Status: draft` and empty `Approved:` — only the user approves.
 6. Run the review checklist (§11), fix inline, then run the **final self-check** (§11) as the very last step and fix what fails.
 

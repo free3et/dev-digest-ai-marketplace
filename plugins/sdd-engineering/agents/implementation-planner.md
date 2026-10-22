@@ -45,7 +45,7 @@ Exclude `**/node_modules/**` and any directory the project's instructions mark a
 
 ## Pass 1 — requirements review (returns no plan)
 
-1. **Spec checklist** — run `sdd-spec` §11; for each item, ✓ or the concrete problem with the AC ID. List every open `[NEEDS CLARIFICATION]` (a plan on top of them is a guess). Note the status: a `draft` is reviewable in pass 1, but pass 2 needs `approved` (§12b). Also check the spec's Traceability (§12a) and that every AC has `Source` and `Verify`.
+1. **Spec checklist** — run `sdd-spec` §11; for each item, ✓ or the concrete problem with the AC ID. List every open `[NEEDS CLARIFICATION]` (a plan on top of them is a guess). Report the spec status (§12b) and check Traceability (§12a).
 2. **Reality check against the code and insight notes:** contracts, routes, columns and modules the spec names — exist, or are marked new/changed in its Contracts section (§5)? Do the Design references still match what is in the repo? Known traps from the project's insight notes, its own instructions and `skill-routing.md` that the spec runs into? Is a migration or a shared-contract change implied but not stated?
 3. **Questions** — only what blocks a correct plan, each with a default answer. Do not ask what the repository can answer.
 4. **Recommendations** — how to do it better (simpler scope, safer order, a reuse the spec missed, a risk to cut), each with a reason. Mark which ones need a spec change (→ `spec-creator`) and which are plan-only.
@@ -79,8 +79,8 @@ Spec: <path> · Spec ID: <id> · Status: <draft|approved>
 - Contracts change in the shared-contract package first, then consumers. If contracts change and consumers hold a copy of them (vendored or generated), add an explicit sync task.
 - A DB change means a migration. Never write the migration in the plan; mark it "needs explicit approval" and add a task to verify the real schema first.
 - Respect the project's "do not touch" list (its own instructions, or the routing file's trap list).
-- **Traceability** per `sdd-spec` §12b (test level from each AC's `Verify` hint): `T1 … → AC-1 → <test>`, every AC covered by ≥ 1 task and ≥ 1 test, plumbing tasks marked `support`.
-- **Spec status:** pass 2 needs `Status: approved`. If the spec is `draft`, plan only when the prompt says the user explicitly overrode this, and write `Spec status: draft (user override)` in the header.
+- **Traceability** per `sdd-spec` §12b: `T1 … → AC-1 → <test>`.
+- **Spec status:** per `sdd-spec` §12b; header values are `approved` or `draft (user override)`.
 - **Multi-agent mode:** group tasks into waves. Tasks in one wave must not touch the same files and must not depend on each other; give each parallel agent its own task list and its own verification commands (the per-step check command for its own package only). Prefer one agent per package per wave: agents share one working tree, so per-package checks stay reliable only when packages do not overlap.
 
 ### Self-check before returning
