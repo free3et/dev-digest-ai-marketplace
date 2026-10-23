@@ -139,6 +139,35 @@ Observed:
 - Version suffix on dependencies, seen again after this clean install: `engineering-paved-path` and `architecture-review` show `1.0.0-6f1b986e1698`, `research-tools` `1.0.1-0147707d816e`, while `sdd-engineering`, which was installed directly, shows plain `1.1.0`. The same suffixes appeared after the first install on 2026-10-19. So far every plugin installed as a dependency carries `<version>-<12 characters>`, and the one installed by name does not. The cause is not confirmed; a colleague installing a dependency directly would settle it.
 - Not covered by this rehearsal: auto-update (the updates were run by hand) and a colleague's machine.
 
+### Behavior check: 1.1.0 against 1.0.0
+
+Purpose: show that 1.1.0 behaves differently from 1.0.0 in the way the changelog says, and that the rollback brings the old behavior back.
+
+**Request**, identical in both runs: `spec-creator`, pass 2, write a spec for a dark-mode toggle in the settings page. Goals: G-1 the choice persists per user; G-2 the page must feel fast, with nobody having decided what "fast" means. The agent is told not to guess.
+
+**Rule under test (1.1.0):** `spec-creator` does not finish a spec while a goal or an NFR has no acceptance criterion. Its report ends with one line, `Mandatory coverage: complete` or `incomplete — <ids>`.
+
+| Version | Run | Spec report |
+|---|---|---|
+| 1.1.0 | live session, another project, 2026-10-22 | `Mandatory coverage: incomplete — G-2, NFR-1`; G-2 stays an open `[NEEDS CLARIFICATION]` with no invented number |
+| 1.0.0 (stable channel, after the rollback) | live session, same project, 2026-10-23 | no `Mandatory coverage` line, in the report or in the written spec |
+
+In the 1.1.0 run the agent also listed NFR-1: it moved "fast" into its own NFR without a target, and the rule applies to NFRs too.
+
+**The same check as an eval:** `spec-creator-reports-incomplete-coverage-for-an-undecided-goal` and the `mandatory-coverage-complete` grader of `spec-creator-pass2-writes-one-ears-spec` (see `plugins/sdd-engineering/evals/README.md`). On the 1.0.0 agent files they fail; on 1.1.0 the three `spec-creator` cases scored 1.00 in 3 of 3 runs.
+
+**Snapshots of `claude plugin list --json`** taken in the project during the rehearsal (not committed, because they contain local paths and unrelated plugins):
+
+| Snapshot | Taken | Shows |
+|---|---|---|
+| `plugin-list.json` | before the update | `sdd-engineering` 1.0.0 |
+| `plugin-list-1.1.0.json` | after `plugin update` | `sdd-engineering` 1.1.0 |
+| `plugin-list-final.json` | after the rollback and the return to the latest channel | `sdd-engineering` 1.1.0, 7 plugins, all enabled |
+
+None of them contains the word `error`.
+
+**Limits.** Each live run is a single run, so it demonstrates the difference but does not measure how often it appears; the eval (3 runs per case) is the repeatable evidence. There is no JSON snapshot from the time 1.0.0 was installed through the stable channel; that state is shown by `plugin list` output and the smoke run above. Both runs came from the author's machine, not from a colleague's or a clean environment.
+
 ## Emergency options
 
 | Situation | Action |
