@@ -145,6 +145,7 @@ function indexPlugin(entry, dir) {
   const plugin = {
     name, ver: version, cat: entry.category || 'Other', desc: (manifest && manifest.description) || entry.description || '',
     updated, path: rel, tags, deps: dependencies(manifest), kw: [...new Set([...(tags || []), ...((manifest && manifest.keywords) || [])])],
+    docs: ['README.md', 'COMPATIBILITY.md', 'CHANGELOG.md'].filter((f) => existsSync(join(dir, f))),
     health: problems.length ? 'err' : warnings.length ? 'warn' : 'ok',
     healthCodes: [...problems, ...warnings],
     log: log.length ? log : [{ ver: version, date: updated, notes: [] }],

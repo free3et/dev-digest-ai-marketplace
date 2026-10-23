@@ -198,5 +198,6 @@ export default {
     deps: 'Dependencies · {n}',
     anyVersion: 'any version',
     depsNote: 'Installed automatically with this plugin.',
+    docs: 'Documentation',
   },
 };
