@@ -125,7 +125,8 @@ Observed:
 - The marketplace was cloned over SSH, and the entry appeared in the user settings.
 - The install resolved `sdd-engineering` `1.0.0`, scope user, enabled; `/reload-plugins` reported 7 plugins.
 - No plugin in this repository uses a persistent data directory (`CLAUDE_PLUGIN_DATA` is not referenced), so `--keep-data` protected nothing here. It is kept in the sequence as a safe default.
-- Not yet recorded: the smoke check on 1.0.0 (a `spec-creator` pass 2 with an undecided goal should print no `Mandatory coverage` line) and the way back to the latest channel (`marketplace remove`, then `marketplace add free3et/dev-digest-ai-marketplace`, `plugin install`, `plugin list`).
+- Smoke check on 1.0.0 (2026-10-23, live session in another project): `spec-creator` pass 2 with the undecided goal "the page must feel fast" produced a spec report **without** a `Mandatory coverage` line, and the written spec had none. On 1.1.0 the same request printed `Mandatory coverage: incomplete — G-2, NFR-1`. The difference is the 1.1.0 rule, so the rollback restored the 1.0.0 behavior. This is a manual run, not the eval suite.
+- Not yet recorded: the way back to the latest channel (`marketplace remove`, then `marketplace add free3et/dev-digest-ai-marketplace`, `plugin install`, `plugin list`).
 
 ## Emergency options
 
