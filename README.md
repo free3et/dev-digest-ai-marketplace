@@ -26,18 +26,26 @@ claude plugin marketplace update dev-digest-ai-marketplace
 claude plugin update <plugin>@dev-digest-ai-marketplace
 ```
 
+To stay on a tested version, add the marketplace pinned to a release tag and install from it (see the rollback rehearsal in [docs/RELEASES.md](docs/RELEASES.md)):
+
+```bash
+claude plugin marketplace add free3et/dev-digest-ai-marketplace#sdd-engineering--v1.0.0
+```
+
 Details, rollback and the release process are in [docs/RELEASES.md](docs/RELEASES.md).
 
 ## Available plugins
 
-| Plugin | What it provides | Depends on |
-|---|---|---|
-| [`sdd-engineering`](plugins/sdd-engineering/README.md) | Spec Driven Development workflow: `spec-creator`, `implementation-planner`, `implementer` and `plan-verifier` agents, plus `run-plan` and `workflow-retro` skills | the three plugins below |
-| [`engineering-paved-path`](plugins/engineering-paved-path/README.md) | Ten skills: React, Next.js, Fastify, layered architecture, testing, security, Zod, TypeScript, Mermaid | none |
-| [`research-tools`](plugins/research-tools/README.md) | Read-only `researcher` agent | none |
-| [`architecture-review`](plugins/architecture-review/README.md) | Read-only `architecture-reviewer` agent | `engineering-paved-path` |
+| Plugin | Version | What it provides | Depends on |
+|---|---|---|---|
+| [`sdd-engineering`](plugins/sdd-engineering/README.md) | 1.1.0 | Spec Driven Development workflow: `spec-creator`, `implementation-planner`, `implementer` and `plan-verifier` agents, plus `run-plan` and `workflow-retro` skills | the three plugins below |
+| [`engineering-paved-path`](plugins/engineering-paved-path/README.md) | 1.0.0 | Ten skills: React, Next.js, Fastify, layered architecture, testing, security, Zod, TypeScript, Mermaid | none |
+| [`research-tools`](plugins/research-tools/README.md) | 1.0.1 | Read-only `researcher` agent | none |
+| [`architecture-review`](plugins/architecture-review/README.md) | 1.0.0 | Read-only `architecture-reviewer` agent | `engineering-paved-path` |
 
-The catalog lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json); the site below lists everything with search.
+The catalog lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json); the site below lists everything with search. Versions here are for orientation; the source of truth is each plugin's `plugin.json`.
+
+`architecture-review` and `sdd-engineering` ship behavior evals in their `evals/` folders (`claude plugin eval`), and `sdd-engineering` documents the Claude Code versions it was tested with in its [`COMPATIBILITY.md`](plugins/sdd-engineering/COMPATIBILITY.md).
 
 ## Repository layout
 
@@ -47,7 +55,7 @@ The catalog lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketpl
 | `plugins/` | One directory per plugin that lives in this repository |
 | `scripts/` | Dependency-free Node scripts: `validate-marketplace`, `release`, `rollback`, `catalog` |
 | `site/` | React + Vite catalog UI for GitHub Pages. Separate from the marketplace; see below |
-| `docs/` | Plugin guidelines, security policy, release process |
+| `docs/` | Plugin guidelines, security policy, release process, cost baseline, catalog site spec |
 | `.github/` | CI workflow and pull request template |
 
 ## Catalog site
@@ -65,7 +73,9 @@ The catalog lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketpl
 - [CONTRIBUTING.md](CONTRIBUTING.md): how to change the catalog or add a plugin safely
 - [docs/PLUGIN-GUIDELINES.md](docs/PLUGIN-GUIDELINES.md): plugin structure, manifest, dependency requirements
 - [docs/SECURITY.md](docs/SECURITY.md): permissions, secrets policy, script review
-- [docs/RELEASES.md](docs/RELEASES.md): SemVer, tags, updates, rollback
+- [docs/RELEASES.md](docs/RELEASES.md): SemVer, tags, updates, rollback and the recorded rollback rehearsal
+- [docs/COST-BASELINE.md](docs/COST-BASELINE.md): cost and quality baseline of `sdd-engineering` and one measured experiment
+- [docs/SITE-SPEC.md](docs/SITE-SPEC.md): what the catalog site shows and how it is built
 
 ## Maintainer commands
 
