@@ -125,7 +125,19 @@ Observed:
 - The marketplace was cloned over SSH, and the entry appeared in the user settings.
 - The install resolved `sdd-engineering` `1.0.0`, scope user, enabled; `/reload-plugins` reported 7 plugins.
 - No plugin in this repository uses a persistent data directory (`CLAUDE_PLUGIN_DATA` is not referenced), so `--keep-data` protected nothing here. It is kept in the sequence as a safe default.
-- Not yet recorded: the smoke check on 1.0.0 (a `spec-creator` pass 2 with an undecided goal should print no `Mandatory coverage` line) and the way back to the latest channel (`marketplace remove`, then `marketplace add free3et/dev-digest-ai-marketplace`, `plugin install`, `plugin list`).
+- Smoke check on 1.0.0 (2026-10-23, live session in another project): `spec-creator` pass 2 with the undecided goal "the page must feel fast" produced a spec report **without** a `Mandatory coverage` line, and the written spec had none. On 1.1.0 the same request printed `Mandatory coverage: incomplete — G-2, NFR-1`. The difference is the 1.1.0 rule, so the rollback restored the 1.0.0 behavior. This is a manual run, not the eval suite.
+- Way back to the latest channel (2026-10-23), same machine:
+
+  ```bash
+  claude plugin marketplace remove dev-digest-ai-marketplace
+  claude plugin marketplace add free3et/dev-digest-ai-marketplace
+  claude plugin install sdd-engineering@dev-digest-ai-marketplace
+  claude plugin list | grep -A3 sdd-engineering
+  ```
+
+  `marketplace remove` removed `sdd-engineering` and its three dependencies. `marketplace add` without a ref added the marketplace from the default branch, with no plugins installed. `plugin install` installed `sdd-engineering` **1.1.0** (user scope, enabled) and the three dependencies with it; `plugin list` confirmed 1.1.0 and `/reload-plugins` reported 7 plugins. `claude plugin list --json` (7 plugins, all enabled) contains no occurrence of `error` (`grep -i error` exits 1).
+- Version suffix on dependencies, seen again after this clean install: `engineering-paved-path` and `architecture-review` show `1.0.0-6f1b986e1698`, `research-tools` `1.0.1-0147707d816e`, while `sdd-engineering`, which was installed directly, shows plain `1.1.0`. The same suffixes appeared after the first install on 2026-10-19. So far every plugin installed as a dependency carries `<version>-<12 characters>`, and the one installed by name does not. The cause is not confirmed; a colleague installing a dependency directly would settle it.
+- Not covered by this rehearsal: auto-update (the updates were run by hand) and a colleague's machine.
 
 ## Emergency options
 
