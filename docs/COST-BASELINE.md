@@ -1,6 +1,6 @@
 # Cost baseline: `sdd-engineering` 1.0.0
 
-Baseline for the cost experiment (stage B of `docs/LAB-PLAN.md`). Nothing was changed to produce it: it is read from eval runs already made on 2026-10-22.
+Baseline for the cost experiment on `sdd-engineering`. Nothing was changed to produce it: it is read from eval runs already made on 2026-10-22.
 
 ## Setup
 
