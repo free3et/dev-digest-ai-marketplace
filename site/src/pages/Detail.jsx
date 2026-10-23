@@ -113,6 +113,12 @@ export function PluginPage({ name }) {
               <p className="note">{t('detail.depsNote')}</p>
             </section>
           )}
+          {!p.external && p.docs?.length > 0 && (
+            <section className="panel">
+              <h3>{t('detail.docs')}</h3>
+              <div className="list">{p.docs.map((f) => <a key={f} className="li" href={`https://github.com/${c.meta.repo}/blob/main/${root}/${f}`} target="_blank" rel="noopener noreferrer"><span className="ln">{f}</span><span className="sp" /><span className="dim" style={{ fontSize: 13 }}>↗</span></a>)}</div>
+            </section>
+          )}
           <SecurityPanel list={list} />
         </div>
       </div>

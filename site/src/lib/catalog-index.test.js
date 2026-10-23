@@ -25,6 +25,12 @@ describe('buildCatalog', () => {
     expect(bad.map((a) => a.id)).toEqual([]);
   });
 
+  it('lists the documentation files each plugin ships', () => {
+    const sdd = catalog.plugins.find((p) => p.name === 'sdd-engineering');
+    expect(sdd.docs).toEqual(['README.md', 'COMPATIBILITY.md', 'CHANGELOG.md']);
+    expect(catalog.plugins.every((p) => p.docs.includes('README.md'))).toBe(true);
+  });
+
   it('indexes plugin dependencies', () => {
     const sdd = catalog.plugins.find((p) => p.name === 'sdd-engineering');
     expect(sdd.deps.map((d) => d.name).sort()).toEqual(['architecture-review', 'engineering-paved-path', 'research-tools']);
